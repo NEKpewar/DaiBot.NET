@@ -12,63 +12,63 @@ namespace SysBot.Pokemon.Helpers
     {
         public static readonly string[] MarkTitle =
         [
-            "el Hambriento",
-            "el Somnoliento",
-            "el Adormilado",
-            "el Madrugador",
-            "el Obnubilado",
-            "el Empapado",
-            "el Atronador",
-            "el Níveo",
-            "el Aterido",
-            "el Sediento",
-            "el Arenoso",
-            "el Errante de la Niebla",
-            "el Predestinado",
-            "el Recién Pescado",
-            "el Entusiasta del Curri",
-            "el Sociable",
-            "el Ermitaño",
-            "el Travieso",
-            "el Despreocupado",
-            "el Nervioso",
-            "el Ilusionado",
-            "el Carismático",
-            "el Sereno",
-            "el Apasionado",
-            "el Distraído",
-            "el Feliz",
-            "el Colérico",
-            "el Sonriente",
-            "el Llorón",
-            "el Bienhumorado",
-            "el Malhumorado",
-            "el Intelectual",
-            "el Impulsivo",
-            "el Astuto",
-            "el Amenazante",
-            "el Amable",
-            "el Aturullado",
-            "el Motivado",
-            "el Desidioso",
-            "el Confiado",
-            "el Inseguro",
-            "el Humilde",
-            "el Pretencioso",
-            "el Vigoroso",
-            "el Extenuado",
-            "el Viajero del Pasado",
-            "el Rutilante",
-            "el Campeón de Paldea",
-            "el Gigante",
-            "el Diminuto",
-            "el Recolector",
-            "el Compañero Leal",
-            "el Sibarita",
-            "el Excepcional",
-            "el Antiguo Alfa",
-            "el Imbatible",
-            "el Antiguo Dominante",
+            " The Peckish",
+            " The Sleepy",
+            " The Dozy",
+            " The Early Riser",
+            " The Cloud Watcher",
+            " The Sodden",
+            " The Thunderstruck",
+            " The Snow Frolicker",
+            " The Shivering",
+            " The Parched",
+            " The Sandswept",
+            " The Mist Drifter",
+            " The Chosen One",
+            " The Catch of The Day",
+            " The Curry Connoisseur",
+            " The Sociable",
+            " The Recluse",
+            " The Rowdy",
+            " The Spacey",
+            " The Anxious",
+            " The Giddy",
+            " The Radiant",
+            " The Serene",
+            " The Feisty",
+            " The Daydreamer",
+            " The Joyful",
+            " The Furious",
+            " The Beaming",
+            " The Teary-Eyed",
+            " The Chipper",
+            " The Grumpy",
+            " The Scholar",
+            " The Rampaging",
+            " The Opportunist",
+            " The Stern",
+            " The Kindhearted",
+            " The Easily Flustered",
+            " The Driven",
+            " The Apathetic",
+            " The Arrogant",
+            " The Reluctant",
+            " The Humble",
+            " The Pompous",
+            " The Lively",
+            " The Worn-Out",
+            " Of The Distant Past",
+            " The Twinkling Star",
+            " The Paldea Champion",
+            " The Great",
+            " The Teeny",
+            " The Treasure Hunter",
+            " The Reliable Partner",
+            " The Gourmet",
+            " The One-in-a-Million",
+            " The Former Alpha",
+            " The Unrivaled",
+            " The Former Titan",
         ];
 
         public static readonly ushort[] ShinyLock = [  (ushort)Species.Victini, (ushort)Species.Keldeo, (ushort)Species.Volcanion, (ushort)Species.Cosmog, (ushort)Species.Cosmoem, (ushort)Species.Magearna, (ushort)Species.Marshadow, (ushort)Species.Eternatus,
@@ -296,31 +296,31 @@ namespace SysBot.Pokemon.Helpers
                 if (ribbonSetMark.RibbonMarkMightiest)
                 {
                     result = RibbonIndex.MarkMightiest;
-                    markTitle = "el Imbatible";
+                    markTitle = " The Unrivaled";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkAlpha)
                 {
                     result = RibbonIndex.MarkAlpha;
-                    markTitle = "el Antiguo Alfa";
+                    markTitle = " The Former Alpha";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkTitan)
                 {
                     result = RibbonIndex.MarkTitan;
-                    markTitle = "el Antiguo Dominante";
+                    markTitle = " The Former Titan";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkJumbo)
                 {
                     result = RibbonIndex.MarkJumbo;
-                    markTitle = "el Gigante";
+                    markTitle = " The Great";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkMini)
                 {
                     result = RibbonIndex.MarkMini;
-                    markTitle = "el Diminuto";
+                    markTitle = " The Teeny";
                     return true;
                 }
             }
@@ -447,6 +447,7 @@ namespace SysBot.Pokemon.Helpers
                 pkm = pkMet;
             return pkm;
         }
+
         private static void ClearNicknameTrash(PKM pokemon)
         {
             switch (pokemon)
@@ -523,48 +524,49 @@ namespace SysBot.Pokemon.Helpers
         private static readonly Dictionary<int, List<(DateOnly Start, DateOnly End)>> UnrivaledDateRanges = new()
         {
             // Generation 1
-            [(int)Species.Charizard] = [(new(2022, 12, 02), new(2022, 12, 04)), (new(2022, 12, 16), new(2022, 12, 18)), (new(2024, 03, 13), new(2024, 03, 17))], // Charizard
-            [(int)Species.Venusaur] = [(new(2024, 02, 28), new(2024, 03, 05))], // Venusaur
-            [(int)Species.Blastoise] = [(new(2024, 03, 06), new(2024, 03, 12))], // Blastoise
+            [(int)Species.Charizard] =  [(new(2022, 12, 02), new(2022, 12, 04)), (new(2022, 12, 16), new(2022, 12, 18)), (new(2024, 03, 13), new(2024, 03, 17))], // Charizard
+            [(int)Species.Venusaur] =   [(new(2024, 02, 28), new(2024, 03, 05))], // Venusaur
+            [(int)Species.Blastoise] =  [(new(2024, 03, 06), new(2024, 03, 12))], // Blastoise
 
             // Generation 2
-            [(int)Species.Meganium] = [(new(2024, 04, 05), new(2024, 04, 07)), (new(2024, 04, 12), new(2024, 04, 14))], // Meganium
+            [(int)Species.Meganium] =   [(new(2024, 04, 05), new(2024, 04, 07)), (new(2024, 04, 12), new(2024, 04, 14))], // Meganium
             [(int)Species.Typhlosion] = [(new(2023, 04, 14), new(2023, 04, 16)), (new(2023, 04, 21), new(2023, 04, 23))], // Typhlosion
 
             // Generation 3
-            [(int)Species.Sceptile] = [(new(2024, 06, 28), new(2024, 06, 30)), (new(2024, 07, 05), new(2024, 07, 07))], // Sceptile
-            [(int)Species.Blaziken] = [(new(2024, 01, 12), new(2024, 01, 14)), (new(2024, 01, 19), new(2024, 01, 21))], // Blaziken
-            [(int)Species.Swampert] = [(new(2024, 05, 31), new(2024, 06, 02)), (new(2024, 06, 07), new(2024, 06, 09))], // Swampert
+            [(int)Species.Sceptile] =   [(new(2024, 06, 28), new(2024, 06, 30)), (new(2024, 07, 05), new(2024, 07, 07))], // Sceptile
+            [(int)Species.Blaziken] =   [(new(2024, 01, 12), new(2024, 01, 14)), (new(2024, 01, 19), new(2024, 01, 21))], // Blaziken
+            [(int)Species.Swampert] =   [(new(2024, 05, 31), new(2024, 06, 02)), (new(2024, 06, 07), new(2024, 06, 09))], // Swampert
 
             // Generation 4
-            [(int)Species.Empoleon] = [(new(2024, 02, 02), new(2024, 02, 04)), (new(2024, 02, 09), new(2024, 02, 11))], // Empoleon
+            [(int)Species.Empoleon] =   [(new(2024, 02, 02), new(2024, 02, 04)), (new(2024, 02, 09), new(2024, 02, 11))], // Empoleon
 
             // Generation 5
-            [(int)Species.Emboar] = [(new(2024, 06, 14), new(2024, 06, 16)), (new(2024, 06, 21), new(2024, 06, 23))], // Emboar
+            [(int)Species.Emboar] =     [(new(2024, 06, 14), new(2024, 06, 16)), (new(2024, 06, 21), new(2024, 06, 23))], // Emboar
+            [(int)Species.Serperior] = [(new(2024, 09, 20), new(2024, 09, 22)), (new(2024, 09, 27), new(2024, 09, 29))], // Serperior
 
             // Generation 6
             [(int)Species.Chesnaught] = [(new(2023, 05, 12), new(2023, 05, 14)), (new(2023, 06, 16), new(2023, 06, 18))], // Chesnaught
-            [(int)Species.Delphox] = [(new(2023, 07, 07), new(2023, 07, 09)), (new(2023, 07, 14), new(2023, 07, 16))], // Delphox
+            [(int)Species.Delphox] =    [(new(2023, 07, 07), new(2023, 07, 09)), (new(2023, 07, 14), new(2023, 07, 16))], // Delphox
 
             // Generation 7
-            [(int)Species.Decidueye] = [(new(2023, 03, 17), new(2023, 03, 19)), (new(2023, 03, 24), new(2023, 03, 26))], // Decidueye
-            [(int)Species.Primarina] = [(new(2024, 05, 10), new(2024, 05, 12)), (new(2024, 05, 17), new(2024, 05, 19))], // Primarina
+            [(int)Species.Decidueye] =  [(new(2023, 03, 17), new(2023, 03, 19)), (new(2023, 03, 24), new(2023, 03, 26))], // Decidueye
+            [(int)Species.Primarina] =  [(new(2024, 05, 10), new(2024, 05, 12)), (new(2024, 05, 17), new(2024, 05, 19))], // Primarina
             [(int)Species.Incineroar] = [(new(2024, 09, 06), new(2024, 09, 08)), (new(2024, 09, 13), new(2024, 09, 15))], // Incineroar
 
             // Generation 8
-            [(int)Species.Rillaboom] = [(new(2023, 07, 28), new(2023, 07, 30)), (new(2023, 08, 04), new(2023, 08, 06))], // Rillaboom
-            [(int)Species.Cinderace] = [(new(2022, 12, 30), new(2023, 01, 01)), (new(2023, 01, 13), new(2023, 01, 15))], // Cinderace
-            [(int)Species.Inteleon] = [(new(2023, 04, 28), new(2023, 04, 30)), (new(2023, 05, 05), new(2023, 05, 07))], // Inteleon
+            [(int)Species.Rillaboom] =  [(new(2023, 07, 28), new(2023, 07, 30)), (new(2023, 08, 04), new(2023, 08, 06))], // Rillaboom
+            [(int)Species.Cinderace] =  [(new(2022, 12, 30), new(2023, 01, 01)), (new(2023, 01, 13), new(2023, 01, 15))], // Cinderace
+            [(int)Species.Inteleon] =   [(new(2023, 04, 28), new(2023, 04, 30)), (new(2023, 05, 05), new(2023, 05, 07))], // Inteleon
 
             // Others
-            [(int)Species.Pikachu] = [(new(2023, 02, 24), new(2023, 02, 27)), (new(2024, 07, 12), new(2024, 07, 25))], // Pikachu
-            [(int)Species.Eevee] = [(new(2023, 11, 17), new(2023, 11, 20))], // Eevee
-            [(int)Species.Mewtwo] = [(new(2023, 09, 01), new(2023, 09, 17))], // Mewtwo
-            [(int)Species.Greninja] = [(new(2023, 01, 27), new(2023, 01, 29)), (new(2023, 02, 10), new(2023, 02, 12))], // Greninja
-            [(int)Species.Samurott] = [(new(2023, 03, 31), new(2023, 04, 02)), (new(2023, 04, 07), new(2023, 04, 09))], // Samurott
+            [(int)Species.Pikachu] =    [(new(2023, 02, 24), new(2023, 02, 27)), (new(2024, 07, 12), new(2024, 07, 25))], // Pikachu
+            [(int)Species.Eevee] =      [(new(2023, 11, 17), new(2023, 11, 20))], // Eevee
+            [(int)Species.Mewtwo] =     [(new(2023, 09, 01), new(2023, 09, 17))], // Mewtwo
+            [(int)Species.Greninja] =   [(new(2023, 01, 27), new(2023, 01, 29)), (new(2023, 02, 10), new(2023, 02, 12))], // Greninja
+            [(int)Species.Samurott] =   [(new(2023, 03, 31), new(2023, 04, 02)), (new(2023, 04, 07), new(2023, 04, 09))], // Samurott
             [(int)Species.IronBundle] = [(new(2023, 12, 22), new(2023, 12, 24))], // Iron Bundle
-            [(int)Species.Dondozo] = [(new(2024, 07, 26), new(2024, 08, 08))], // Dondozo
-            [(int)Species.Dragonite] = [(new(2024, 08, 23), new(2024, 09, 01))], // Dragonite
+            [(int)Species.Dondozo] =    [(new(2024, 07, 26), new(2024, 08, 08))], // Dondozo
+            [(int)Species.Dragonite] =  [(new(2024, 08, 23), new(2024, 09, 01))], // Dragonite
         };
 
         public static void CheckAndSetUnrivaledDate(PKM pk)
@@ -583,9 +585,9 @@ namespace SysBot.Pokemon.Helpers
                 // Special handling for Hisuian forms
                 dateRanges = pk.Species switch
                 {
-                    (int)Species.Decidueye => [(new(2023, 10, 06), new(2023, 10, 08)), (new(2023, 10, 13), new(2023, 10, 15))],
+                    (int)Species.Decidueye =>  [(new(2023, 10, 06), new(2023, 10, 08)), (new(2023, 10, 13), new(2023, 10, 15))],
                     (int)Species.Typhlosion => [(new(2023, 11, 03), new(2023, 11, 05)), (new(2023, 11, 10), new(2023, 11, 12))],
-                    (int)Species.Samurott => [(new(2023, 11, 24), new(2023, 11, 26)), (new(2023, 12, 01), new(2023, 12, 03))],
+                    (int)Species.Samurott =>   [(new(2023, 11, 24), new(2023, 11, 26)), (new(2023, 12, 01), new(2023, 12, 03))],
                     _ => []
                 };
             }
