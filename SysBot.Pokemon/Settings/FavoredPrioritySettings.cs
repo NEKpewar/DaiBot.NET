@@ -29,24 +29,24 @@ public class FavoredPrioritySettings : IFavoredCPQSetting
 
     private float _multiply = 0.5f;
 
-    [Category(Configure), Description("Insertado después de (usuarios desfavorecidos)^(exponente) usuarios desfavorecidos."), DisplayName("Exponente")]
+    [Category(Configure), Description("Inserted after (unfavored users)^(exponent) unfavored users.")]
     public float Exponent
     {
         get => _exponent;
         set => _exponent = Math.Max(_mexp, value);
     }
 
-    [Category(Configure), Description("Número de usuarios desfavorecidos que no se deben omitir. Esto sólo se aplica si hay un número significativo de usuarios desfavorecidos en la cola.")]
+    [Category(Configure), Description("Number of unfavored users to not skip over. This only is enforced if a significant number of unfavored users are in the queue.")]
     public int MinimumFreeAhead
     {
         get => _minimumFreeAhead;
         set => _minimumFreeAhead = Math.Max(_mfi, value);
     }
 
-    [Category(Configure), Description("Número mínimo de usuarios desfavorecidos en la cola para que se aplique {Minimum Free Ahead}. Cuando el número antes mencionado es mayor que este valor, un usuario favorecido no se coloca por delante de {Minimum Free Ahead} usuarios desfavorecidos.")]
+    [Category(Configure), Description("Minimum number of unfavored users in queue to cause {MinimumFreeAhead} to be enforced. When the aforementioned number is higher than this value, a favored user is not placed ahead of {MinimumFreeAhead} unfavored users.")]
     public int MinimumFreeBypass => (int)Math.Ceiling(MinimumFreeAhead * MinimumFreeBypassFactor);
 
-    [Category(Configure), Description("Escalar que se multiplica por {Minimum Free Ahead} para determinar el valor de {Minimum Free Bypass}.")]
+    [Category(Configure), Description("Scalar that is multiplied with {MinimumFreeAhead} to determine the {MinimumFreeBypass} value.")]
     public float MinimumFreeBypassFactor
     {
         get => _bypassFactor;
@@ -63,5 +63,5 @@ public class FavoredPrioritySettings : IFavoredCPQSetting
         set => _multiply = Math.Max(_mmul, value);
     }
 
-    public override string ToString() => "Configuración de favoritismo";
+    public override string ToString() => "Favoritism Settings";
 }

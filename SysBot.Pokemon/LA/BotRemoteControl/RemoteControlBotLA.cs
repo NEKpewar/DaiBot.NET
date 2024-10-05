@@ -17,10 +17,10 @@ public class RemoteControlBotLA(PokeBotState Config) : PokeRoutineExecutor8LA(Co
     {
         try
         {
-            Log("Identificando los datos del entrenador de la consola host.");
+            Log("Identifying trainer data of the host console.");
             await IdentifyTrainer(token).ConfigureAwait(false);
 
-            Log("Iniciando el bucle principal, luego esperando comandos.");
+            Log("Starting main loop, then waiting for commands.");
             Config.IterateNextRoutine();
             while (!token.IsCancellationRequested)
             {
@@ -33,7 +33,7 @@ public class RemoteControlBotLA(PokeBotState Config) : PokeRoutineExecutor8LA(Co
             Log(e.Message);
         }
 
-        Log($"Finalizando el bucle {nameof(RemoteControlBotLA)}.");
+        Log($"Ending {nameof(RemoteControlBotLA)} loop.");
         await HardStop().ConfigureAwait(false);
     }
 
@@ -45,7 +45,7 @@ public class RemoteControlBotLA(PokeBotState Config) : PokeRoutineExecutor8LA(Co
         await Task.Delay(2_000, t).ConfigureAwait(false);
         if (!t.IsCancellationRequested)
         {
-            Log("Reiniciando el bucle principal.");
+            Log("Restarting the main loop.");
             await MainLoop(t).ConfigureAwait(false);
         }
     }

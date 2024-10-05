@@ -18,7 +18,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
             if (typeof(T) == typeof(PB7))
                 return GameInfo.GetStrings(GetLanguageIndex(GameVersion.GE));
 
-            throw new ArgumentException("El tipo no tiene cadenas de juego reconocidas.", typeof(T).Name);
+            throw new ArgumentException("Type does not have recognized game strings.", typeof(T).Name);
         }
 
         public static IPersonalAbility12 GetPersonalInfo(ushort speciesIndex)
@@ -34,7 +34,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
             if (typeof(T) == typeof(PB7))
                 return PersonalTable.GG.GetFormEntry(speciesIndex, 0);
 
-            throw new ArgumentException("El tipo no tiene una tabla personal reconocida.", typeof(T).Name);
+            throw new ArgumentException("Type does not have a recognized personal table.", typeof(T).Name);
         }
 
         public static IPersonalFormInfo GetPersonalFormInfo(ushort speciesIndex)
@@ -50,7 +50,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
             if (typeof(T) == typeof(PB7))
                 return PersonalTable.GG.GetFormEntry(speciesIndex, 0);
 
-            throw new ArgumentException("El tipo no tiene una tabla de formulario personal reconocida.", typeof(T).Name);
+            throw new ArgumentException("Type does not have a recognized personal form table.", typeof(T).Name);
         }
 
         public static EntityContext GetGeneration()
@@ -66,7 +66,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
             if (typeof(T) == typeof(PB7))
                 return EntityContext.Gen7b;
 
-            throw new ArgumentException("El tipo no tiene una generación reconocida.", typeof(T).Name);
+            throw new ArgumentException("Type does not have a recognized generation.", typeof(T).Name);
         }
 
         public static int GetLanguageIndex(GameVersion version)
@@ -87,7 +87,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                 return LearnSource8SWSH.Instance;
             if (pk is PB7)
                 return LearnSource7GG.Instance;
-            throw new ArgumentException("Tipo PKM no admitido.", nameof(pk));
+            throw new ArgumentException("Unsupported PKM type.", nameof(pk));
         }
     }
 }

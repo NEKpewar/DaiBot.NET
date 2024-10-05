@@ -15,7 +15,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
 
             if (pk is not IRibbonIndex m)
             {
-                correctionMessages.Add("- PKM no implementa IRibbonIndex Corrigiendo marcas.");
+                correctionMessages.Add("PKM does not implement IRibbonIndex. Correcting marks.");
                 return Task.FromResult<(string? MarkLine, List<string> CorrectionMessages)>((".Ribbons=$SuggestAll", correctionMessages));
             }
 
@@ -46,7 +46,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                 }
             }
 
-            correctionMessages.Add("- Corrigiendo marcas/cintas. Cambiando a **.Ribbons=$SuggestAll**");
+            correctionMessages.Add("Correcting Marks/Ribbons.  Changing to **.Ribbons=$SuggestAll**");
             return Task.FromResult<(string? MarkLine, List<string> CorrectionMessages)>((".Ribbons=$SuggestAll", correctionMessages));
         }
 

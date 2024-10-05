@@ -12,27 +12,27 @@ public class YouTubeSettings
 
     private const string Startup = nameof(Startup);
 
-    [Category(Startup), Description("ID del canal al que enviar mensajes")]
+    [Category(Startup), Description("ChannelID to Send Messages To")]
     public string ChannelID { get; set; } = string.Empty;
 
-    [Category(Startup), Description("ID de cliente del bot")]
+    [Category(Startup), Description("Bot ClientID")]
     public string ClientID { get; set; } = string.Empty;
 
     // Startup
-    [Category(Startup), Description("Cliente Secreto del bot")]
+    [Category(Startup), Description("Bot Client Secret")]
     public string ClientSecret { get; set; } = string.Empty;
 
-    [Category(Startup), Description("Prefijo de comando de bot")]
+    [Category(Startup), Description("Bot Command Prefix")]
     public char CommandPrefix { get; set; } = '$';
 
-    [Category(Operation), Description("Mensaje enviado cuando se libera la Barrera.")]
+    [Category(Operation), Description("Message sent when the Barrier is released.")]
     public string MessageStart { get; set; } = string.Empty;
 
-    [Category(Operation), Description("Nombres de usuario de Sudo")]
+    [Category(Operation), Description("Sudo Usernames")]
     public string SudoList { get; set; } = string.Empty;
 
     // Operation
-    [Category(Operation), Description("Los usuarios con estos nombres de usuario no pueden usar el bot.")]
+    [Category(Operation), Description("Users with these usernames cannot use the bot.")]
     public string UserBlacklist { get; set; } = string.Empty;
 
     public bool IsSudo(string username)
@@ -41,7 +41,7 @@ public class YouTubeSettings
         return sudos.Contains(username);
     }
 
-    public override string ToString() => "Configuración de integración de YouTube";
+    public override string ToString() => "YouTube Integration Settings";
 }
 
 public enum YouTubeMessageDestination

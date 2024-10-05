@@ -27,10 +27,10 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
     {
         if (settings.ScreenOff)
         {
-            Log("Encendiendo la pantalla.");
+            Log("Turning on screen.");
             await SetScreen(ScreenState.On, token).ConfigureAwait(false);
         }
-        Log("Desconexión de controladores al salir de rutina.");
+        Log("Detaching controllers on routine exit.");
         await DetachController(token).ConfigureAwait(false);
     }
 
@@ -43,10 +43,10 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
     public async Task CloseGame(PokeTradeHubConfig config, CancellationToken token)
     {
         var timing = config.Timings;
-        await Click(HOME, 2_000 + timing.ExtraTimeReturnHome, token).ConfigureAwait(false);
+        await Click(HOME, 2_000 + timing.ClosingGameSettings.ExtraTimeReturnHome, token).ConfigureAwait(false);
         await Click(X, 1_000, token).ConfigureAwait(false);
-        await Click(A, 5_000 + timing.ExtraTimeCloseGame, token).ConfigureAwait(false);
-        Log("Cerre el juego!");
+        await Click(A, 5_000 + timing.ClosingGameSettings.ExtraTimeCloseGame, token).ConfigureAwait(false);
+        Log("Closed out of the game!");
     }
 
     public int GetAdvancesPassed(ulong prevs0, ulong prevs1, ulong news0, ulong news1)
@@ -63,7 +63,7 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
                 return i + 1;
             if (i > 500)
             {
-                Log("¡No se pudo encontrar el siguiente estado de RNG en 500 avances!");
+                Log("Could not find the next RNG state in 500 advances!");
                 return -1;
             }
         }
@@ -107,26 +107,26 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
         // Check title so we can warn if mode is incorrect.
         string title = await SwitchConnection.GetTitleID(token).ConfigureAwait(false);
         if (title != LetsGoEeveeID && title != LetsGoPikachuID)
-            throw new Exception($"{title} no es un título válido de Pokémon: Let's Go. ¿Tu modo es correcto?");
+            throw new Exception($"{title} is not a valid Pokémon: Let's Go title. Is your mode correct?");
 
         var sav = await GetFakeTrainerSAV(token).ConfigureAwait(false);
         InitSaveData(sav);
 
         if (!IsValidTrainerData())
-            throw new Exception("Los datos del entrenador no son válidos. Consulte la wiki de Sys Bot.NET para obtener datos del entrenador incorrectos o nulos.");
+            throw new Exception("Trainer data is not valid. Refer to the SysBot.NET wiki for bad or no trainer data.");
         if (await GetTextSpeed(token).ConfigureAwait(false) < TextSpeedOption.Fast)
-            throw new Exception("La velocidad del texto debe configurarse en RÁPIDO. Solucione esto para un funcionamiento correcto.");
+            throw new Exception("Text speed should be set to FAST. Fix this for correct operation.");
 
         return sav;
     }
 
     public async Task InitializeHardware(IBotStateSettings settings, CancellationToken token)
     {
-        Log("Desconectando al inicio.");
+        Log("Detaching on startup.");
         await DetachController(token).ConfigureAwait(false);
         if (settings.ScreenOff)
         {
-            Log("Apagando la pantalla.");
+            Log("Turning off screen.");
             await SetScreen(ScreenState.Off, token).ConfigureAwait(false);
         }
         await SetController(ControllerType.JoyRight1, token);
@@ -199,8 +199,8 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
 
     public async Task SetLure(bool activate, CancellationToken token)
     {
-        var msg = activate ? "Activando" : "Desactivando";
-        Log($"{msg} Señuelo máximo.");
+        var msg = activate ? "Activating" : "Deactivating";
+        Log($"{msg} Max Lure.");
 
         var lure_type = activate ? 902 : 0; // Max Lure
         var data = BitConverter.GetBytes(lure_type);
@@ -226,29 +226,43 @@ public abstract class PokeRoutineExecutor7LGPE : PokeRoutineExecutor<PB7>
 
     public async Task StartGame(PokeTradeHubConfig config, CancellationToken token)
     {
-        var timing = config.Timings;
 
         // Open game.
-        await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+        var timing = config.Timings;
+        var loadPro = timing.OpeningGameSettings.ProfileSelectionRequired ? timing.OpeningGameSettings.ExtraTimeLoadProfile : 0;
+
+        await Click(A, 1_000 + loadPro, token).ConfigureAwait(false); // Initial "A" Press to start the Game + a delay if needed for profiles to load
 
         // Menus here can go in the order: Update Prompt -> Profile -> DLC check -> Unable to use DLC.
         //  The user can optionally turn on the setting if they know of a breaking system update incoming.
-        if (timing.AvoidSystemUpdate)
+        if (timing.MiscellaneousSettings.AvoidSystemUpdate)
         {
             await Click(DUP, 0_600, token).ConfigureAwait(false);
-            await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+            await Click(A, 1_000 + timing.OpeningGameSettings.ExtraTimeLoadProfile, token).ConfigureAwait(false);
         }
 
-        await Click(A, 1_000, token).ConfigureAwait(false);
+        // Only send extra Presses if we need to
+        if (timing.OpeningGameSettings.ProfileSelectionRequired)
+        {
+            await Click(A, 1_000, token).ConfigureAwait(false); // Now we are on the Profile Screen
+            await Click(A, 1_000, token).ConfigureAwait(false); // Select the profile
+        }
 
-        Log("¡Reiniciando el juego!");
-        await Task.Delay(4_000 + timing.ExtraTimeLoadGame, token).ConfigureAwait(false);
+        // Digital game copies take longer to load
+        if (timing.OpeningGameSettings.CheckGameDelay)
+        {
+            await Task.Delay(2_000 + timing.OpeningGameSettings.ExtraTimeCheckGame, token).ConfigureAwait(false);
+        }
+
+        Log("Restarting the game!");
+
+        await Task.Delay(4_000 + timing.OpeningGameSettings.ExtraTimeLoadGame, token).ConfigureAwait(false);
         await DetachController(token).ConfigureAwait(false);
 
         while (!await IsOnOverworldStandard(token).ConfigureAwait(false))
             await Click(A, 1_000, token).ConfigureAwait(false);
 
-        Log("¡De vuelta al supramundo!");
+        Log("Back in the overworld!");
     }
 
     public async Task WriteBoxPokemon(PB7 pk, int box, int slot, CancellationToken token)

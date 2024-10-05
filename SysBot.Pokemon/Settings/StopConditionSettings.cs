@@ -10,40 +10,40 @@ public class StopConditionSettings
 {
     private const string StopConditions = nameof(StopConditions);
 
-    [Category(StopConditions), Description("Mantiene presionado el botón Capturar para grabar un clip de 30 segundos cuando Encounter Bot o Fossilbot encuentra un Pokémon coincidente.")]
+    [Category(StopConditions), Description("Holds Capture button to record a 30 second clip when a matching Pokémon is found by EncounterBot or Fossilbot.")]
     public bool CaptureVideoClip { get; set; }
 
-    [Category(StopConditions), Description("Tiempo extra en milisegundos para esperar después de que un encuentro coincida antes de presionar Capturar para Encounter Bot o Fossilbot.")]
+    [Category(StopConditions), Description("Extra time in milliseconds to wait after an encounter is matched before pressing Capture for EncounterBot or Fossilbot.")]
     public int ExtraTimeWaitCaptureVideo { get; set; } = 10000;
 
-    [Category(StopConditions), Description("Detente sólo en Pokémon que tengan una marca.")]
+    [Category(StopConditions), Description("Stop only on Pokémon that have a mark.")]
     public bool MarkOnly { get; set; }
 
-    [Category(StopConditions), Description("Si no está vacía, la cadena proporcionada se antepondrá al mensaje de registro de resultados encontrados para las alertas de Echo para quien usted especifique. Para Discord, use <@número de ID de usuario> para mencionar.")]
+    [Category(StopConditions), Description("If not empty, the provided string will be prepended to the result found log message to Echo alerts for whomever you specify. For Discord, use <@userIDnumber> to mention.")]
     public string MatchFoundEchoMention { get; set; } = string.Empty;
 
-    [Category(StopConditions), Description("Si se establece en VERDADERO, coincide con la configuración de Shiny Target y Target IVs. De lo contrario, busca coincidencias entre Shiny Target o Target IV.")]
+    [Category(StopConditions), Description("If set to TRUE, matches both ShinyTarget and TargetIVs settings. Otherwise, looks for either ShinyTarget or TargetIVs match.")]
     public bool MatchShinyAndIV { get; set; } = true;
 
-    [Category(StopConditions), Description("Selecciona el tipo brillante en el que detenerse.")]
+    [Category(StopConditions), Description("Selects the shiny type to stop on.")]
     public TargetShinyType ShinyTarget { get; set; } = TargetShinyType.DisableOption;
 
-    [Category(StopConditions), Description("Solo se detiene en Pokémon con este ID de formulario. No hay restricciones si se deja en blanco.")]
+    [Category(StopConditions), Description("Stops only on Pokémon with this FormID. No restrictions if left blank.")]
     public int? StopOnForm { get; set; }
 
-    [Category(StopConditions), Description("Se detiene solo en Pokémon de esta especie. No hay restricciones si se configura en \"Ninguno\".")]
+    [Category(StopConditions), Description("Stops only on Pokémon of this species. No restrictions if set to \"None\".")]
     public Species StopOnSpecies { get; set; }
 
-    [Category(StopConditions), Description("IV máximos aceptados en el formato HP/Atk/Def/Sp A/Sp D/Spe. Utilice \"x\" para IV no marcados y \"/\" como separador.")]
+    [Category(StopConditions), Description("Maximum accepted IVs in the format HP/Atk/Def/SpA/SpD/Spe. Use \"x\" for unchecked IVs and \"/\" as a separator.")]
     public string TargetMaxIVs { get; set; } = "";
 
-    [Category(StopConditions), Description("IV mínimos aceptados en el formato HP/Atk/Def/Sp A/Sp D/Spe. Utilice \"x\" para IV no marcados y \"/\" como separador.")]
+    [Category(StopConditions), Description("Minimum accepted IVs in the format HP/Atk/Def/SpA/SpD/Spe. Use \"x\" for unchecked IVs and \"/\" as a separator.")]
     public string TargetMinIVs { get; set; } = "";
 
-    [Category(StopConditions), Description("Detente sólo en Pokémon de la naturaleza especificada.")]
+    [Category(StopConditions), Description("Stop only on Pokémon of the specified nature.")]
     public Nature TargetNature { get; set; } = Nature.Random;
 
-    [Category(StopConditions), Description("Lista de marcas a ignorar separadas por comas. Utilice el nombre completo, p. \"Marca poco común, Marca del amanecer, Marca orgullosa\".")]
+    [Category(StopConditions), Description("List of marks to ignore separated by commas. Use the full name, e.g. \"Uncommon Mark, Dawn Mark, Prideful Mark\".")]
     public string UnwantedMarks { get; set; } = "";
 
     public static bool EncounterFound<T>(T pk, int[] targetminIVs, int[] targetmaxIVs, StopConditionSettings settings, IReadOnlyList<string>? marklist) where T : PKM
@@ -114,7 +114,7 @@ public class StopConditionSettings
         {
             var rstring = GetMarkName(r);
             if (!string.IsNullOrEmpty(rstring))
-                set += $"\nPokémon encontrados con **{GetMarkName(r)}**!";
+                set += $"\nPokémon found to have **{GetMarkName(r)}**!";
         }
         return set;
     }
@@ -130,7 +130,7 @@ public class StopConditionSettings
 
     public virtual bool IsUnwantedMark(string mark, IReadOnlyList<string> marklist) => marklist.Contains(mark);
 
-    public override string ToString() => "Configuración de condición de parada";
+    public override string ToString() => "Stop Condition Settings";
 
     private static bool HasMark(IRibbonIndex pk)
     {

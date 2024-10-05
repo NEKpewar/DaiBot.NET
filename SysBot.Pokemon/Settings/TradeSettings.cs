@@ -25,83 +25,83 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
     private const string EmbedSettings = nameof(EmbedSettings);
 
-    public override string ToString() => "Ajustes de configuración de Trade";
+    public override string ToString() => "Trade Configuration Settings";
 
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class EmojiInfo
     {
-        [Description("La cadena completa para el emoji.")]
+        [Description("The full string for the emoji.")]
         public string EmojiString { get; set; } = string.Empty;
 
         public override string ToString()
         {
-            return string.IsNullOrEmpty(EmojiString) ? "No establecido" : EmojiString;
+            return string.IsNullOrEmpty(EmojiString) ? "Not Set" : EmojiString;
         }
     }
 
-    [Category(TradeConfig), Description("Ajustes relacionados con la configuración del trade."), DisplayName("Configuración del trade"), Browsable(true)]
+    [Category(TradeConfig), Description("Settings related to Trade Configuration."), DisplayName("Trade Configuration"), Browsable(true)]
     public TradeSettingsCategory TradeConfiguration { get; set; } = new();
 
-    [Category(VGCPastesConfig), Description("Ajustes relacionados con la Configuración de VGCPastes."), DisplayName("Configuración de VGCPastes"), Browsable(true)]
+    [Category(VGCPastesConfig), Description("Settings related to VGCPastes Configuration."), DisplayName("VGC Pastes Configuration"), Browsable(true)]
     public VGCPastesCategory VGCPastesConfiguration { get; set; } = new();
 
-    [Category(AutoCorrectShowdownConfig), Description("Configuraciones relacionadas con la corrección automática de conjuntos de showdown."), DisplayName("Configuración de la autocorrección de Showdown"), Browsable(true)]
+    [Category(AutoCorrectShowdownConfig), Description("Settings related to Auto Correcting Showdown Sets."), DisplayName("Auto Correct Showdown Settings"), Browsable(true)]
     public AutoCorrectShowdownCategory AutoCorrectConfig { get; set; } = new();
 
-    [Category(EmbedSettings), Description("Ajustes relacionados con el Trade Embed en Discord."), DisplayName("Configuración del Embed Trade"), Browsable(true)]
+    [Category(EmbedSettings), Description("Settings related to the Trade Embed in Discord."), DisplayName("Trade Embed Settings"), Browsable(true)]
     public TradeEmbedSettingsCategory TradeEmbedSettings { get; set; } = new();
 
-    [Category(RequestFolders), Description("Ajustes relacionados con las carpetas de solicitud."), DisplayName("Configuración de las carpetas de solicitud."), Browsable(true)]
+    [Category(RequestFolders), Description("Settings related to Request Folders."), DisplayName("Request Folder Settings"), Browsable(true)]
     public RequestFolderSettingsCategory RequestFolderSettings { get; set; } = new();
 
-    [Category(CountStats), Description("Ajustes relacionados con las estadísticas de recuento de trades."), DisplayName("Configuración de las estadísticas de recuento de trades"), Browsable(true)]
+    [Category(CountStats), Description("Settings related to Trade Count Statistics."), DisplayName("Trade Count Statistics Settings"), Browsable(true)]
     public CountStatsSettingsCategory CountStatsSettings { get; set; } = new();
 
     [Category(TradeConfig), TypeConverter(typeof(CategoryConverter<TradeSettingsCategory>))]
     public class TradeSettingsCategory
     {
-        public override string ToString() => "Ajustes de configuración de trade";
+        public override string ToString() => "Trade Configuration Settings";
 
-        [Category(TradeConfig), Description("Código de enlace mínimo."), DisplayName("Código mínimo de enlace comercial")]
+        [Category(TradeConfig), Description("Minimum Link Code."), DisplayName("Minimum Trade Link Code")]
         public int MinTradeCode { get; set; } = 0;
 
-        [Category(TradeConfig), Description("Código de enlace máximo."), DisplayName("Código de enlace comercial máximo")]
+        [Category(TradeConfig), Description("Maximum Link Code."), DisplayName("Maximum Trade Link Code")]
         public int MaxTradeCode { get; set; } = 9999_9999;
 
-        [Category(TradeConfig), Description("Si se establece en True, el código de trade de los usuarios de Discord se almacenará y se utilizará repetidamente sin cambiar."), DisplayName("Almacenar y reutilizar códigos de Tradeo")]
+        [Category(TradeConfig), Description("If set to True, Discord Users trade code will be stored and used repeatedly without changing."), DisplayName("Store and Reuse Trade Codes")]
         public bool StoreTradeCodes { get; set; } = true;
 
-        [Category(TradeConfig), Description("Tiempo a esperar por un usuario en segundos."), DisplayName("Tiempo a esperar por un usuario (segundos)")]
-        public int TradeWaitTime { get; set; } = 40;
+        [Category(TradeConfig), Description("Time to wait for a trade partner in seconds."), DisplayName("Trade Partner Wait Time (seconds)")]
+        public int TradeWaitTime { get; set; } = 30;
 
-        [Category(TradeConfig), Description("Cantidad máxima de tiempo en segundos pulsando A para esperar a que se procese una operación."), DisplayName("Tiempo máximo de confirmación de la operación (segundos)")]
+        [Category(TradeConfig), Description("Max amount of time in seconds pressing A to wait for a trade to process."), DisplayName("Maximum Trade Confirmation Time (seconds)")]
         public int MaxTradeConfirmTime { get; set; } = 25;
 
-        [Category(TradeConfig), Description("Seleccione la especie por defecto para \"ItemTrade\", si está configurado."), DisplayName("Especies por defecto para el Item Trade")]
+        [Category(TradeConfig), Description("Select default species for \"ItemTrade\", if configured."), DisplayName("Default Species for Item Trades")]
         public Species ItemTradeSpecies { get; set; } = Species.None;
 
-        [Category(TradeConfig), Description("Item por defecto que se enviará si no se especifica ninguno."), DisplayName("Item por defecto para trades")]
+        [Category(TradeConfig), Description("Default held item to send if none is specified."), DisplayName("Default Held Item for Trades")]
         public HeldItem DefaultHeldItem { get; set; } = HeldItem.None;
 
-        [Category(TradeConfig), Description("Si se establece en True, cada Pokemon válido vendrá con todos los Movimientos Reaprendibles sugeridos sin necesidad de utilizar un batch command."), DisplayName("Sugerir movimientos reaprendibles por defecto")]
+        [Category(TradeConfig), Description("If set to True, each valid Pokemon will come with all suggested Relearnable Moves without the need for a batch command."), DisplayName("Suggest Relearnable Moves by Default")]
         public bool SuggestRelearnMoves { get; set; } = true;
 
-        [Category(TradeConfig), Description("Activar o desactivar los trades por lotes."), DisplayName("Permitir trades por lotes")]
+        [Category(TradeConfig), Description("Toggle to allow or disallow batch trades."), DisplayName("Allow Batch Trades")]
         public bool AllowBatchTrades { get; set; } = true;
 
-        [Category(TradeConfig), Description("Máximo de pokemons de un solo comercio. El modo por lotes se cerrará si esta configuración es inferior a 1"), DisplayName("Máximo de Pokémon por trades")]
+        [Category(TradeConfig), Description("Maximum pokemons of single trade. Batch mode will be closed if this configuration is less than 1"), DisplayName("Maximum Pokémon per Trade")]
         public int MaxPkmsPerTrade { get; set; } = 1;
 
-        [Category(TradeConfig), Description("Dump Trade: La rutina de dump se detendrá tras un número máximo de deumps de un mismo usuario."), DisplayName("Dumps máximos por operación")]
+        [Category(TradeConfig), Description("Dump Trade: Dumping routine will stop after a maximum number of dumps from a single user."), DisplayName("Maximum Dumps per Trade")]
         public int MaxDumpsPerTrade { get; set; } = 20;
 
-        [Category(TradeConfig), Description("Dump Trade: La rutina de dump se detendrá después de pasar x segundos en el trade."), DisplayName("Tiempo máximo de dump (segundos)")]
+        [Category(TradeConfig), Description("Dump Trade: Dumping routine will stop after spending x seconds in trade."), DisplayName("Maximum Dump Trade Time (seconds)")]
         public int MaxDumpTradeTime { get; set; } = 180;
 
-        [Category(TradeConfig), Description("Dump Trade: Si está activada, la rutina de dump mostrará al usuario información sobre la comprobación de la legalidad."), DisplayName("Verificación de la legalidad del dumping")]
+        [Category(TradeConfig), Description("Dump Trade: If enabled, Dumping routine will output legality check information to the user."), DisplayName("Dump Trade Legality Check")]
         public bool DumpTradeLegalityCheck { get; set; } = true;
 
-        [Category(TradeConfig), Description("Ajustes LGPE.")]
+        [Category(TradeConfig), Description("LGPE Setting.")]
         public int TradeAnimationMaxDelaySeconds = 25;
 
         public enum HeldItem
@@ -139,14 +139,14 @@ public class TradeSettings : IBotStateSettings, ICountSettings
     [Category(nameof(AutoCorrectShowdownConfig)), TypeConverter(typeof(CategoryConverter<AutoCorrectShowdownCategory>))]
     public class AutoCorrectShowdownCategory
     {
-        public override string ToString() => "Configuración de corrección automática de los conjuntos showdown";
+        public override string ToString() => "Auto Correct Showdown Settings";
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, cada conjunto de showdown fallido pasará por una corrección automática."), DisplayName("Habilitar corrección automática")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, each failed showdown set will go through auto correction."), DisplayName("Enable Auto Correct")]
         public bool EnableAutoCorrect { get; set; } = true;
 
         private bool _autoCorrectEmbedIndicator = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, colocaremos un indicador en Trade Embeds que muestre que una operación se corrigió automáticamente."), DisplayName("Mostrar indicador Trade Embed?")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, we will put an indicator on Trade Embeds showing a trade was Auto Corrected."), DisplayName("Show Trade Embed Indicator?")]
         public bool AutoCorrectEmbedIndicator
         {
             get => EnableAutoCorrect && _autoCorrectEmbedIndicator;
@@ -155,7 +155,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectNickname = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá los apodos ilegales."), DisplayName("Autocorrección de Apodos")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct illegal nicknames."), DisplayName("Auto Correct Nicknames?")]
         public bool AutoCorrectNickname
         {
             get => EnableAutoCorrect && _autoCorrectNickname;
@@ -164,7 +164,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private string _fixedNickname = string.Empty;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Establezca un apodo predeterminado. Si no se proporciona ninguno, simplemente estará en blanco."), DisplayName("Cambiar el nombre de los apodos no válidos a...")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("Set a default Nickname. If none provided, it will just be blank."), DisplayName("Rename Invalid Nicknames to...")]
         public string FixedNickname
         {
             get => EnableAutoCorrect ? _fixedNickname : string.Empty;
@@ -173,7 +173,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectSpeciesAndForm = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá las especies y formas incorrectas."), DisplayName("Autocorrección de Especies y Formas")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong species and form."), DisplayName("Auto Correct Species and Form")]
         public bool AutoCorrectSpeciesAndForm
         {
             get => EnableAutoCorrect && _autoCorrectSpeciesAndForm;
@@ -182,7 +182,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectHeldItem = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el item incorrecto."), DisplayName("Autocorrección del Item")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong held item."), DisplayName("Auto Correct Held Item")]
         public bool AutoCorrectHeldItem
         {
             get => EnableAutoCorrect && _autoCorrectHeldItem;
@@ -191,7 +191,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectNature = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá la naturaleza incorrecta."), DisplayName("Autocorrección de Naturaleza")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong nature."), DisplayName("Auto Correct Nature")]
         public bool AutoCorrectNature
         {
             get => EnableAutoCorrect && _autoCorrectNature;
@@ -200,7 +200,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectAbility = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en Verdadero, la corrección automática corregirá la habilidad incorrecta."), DisplayName("Autocorrección de Habilidad")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong ability."), DisplayName("Auto Correct Ability")]
         public bool AutoCorrectAbility
         {
             get => EnableAutoCorrect && _autoCorrectAbility;
@@ -209,7 +209,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectBall = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el nombre de pokeball incorrecto."), DisplayName("Autocorrección de PokeBall")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong Ball Name."), DisplayName("Auto Correct Ball")]
         public bool AutoCorrectBall
         {
             get => EnableAutoCorrect && _autoCorrectBall;
@@ -218,7 +218,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectGender = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el género incorrecto."), DisplayName("Autocorrección del Genero")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong gender."), DisplayName("Auto Correct Gender")]
         public bool AutoCorrectGender
         {
             get => EnableAutoCorrect && _autoCorrectGender;
@@ -227,7 +227,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectMovesLearnset = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la autocorrección corregirá los movimientos erróneos y los learnset."), DisplayName("Autocorrección de los Movimientos/Learnset")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong moves and learnset."), DisplayName("Auto Correct Moves/Learnset")]
         public bool AutoCorrectMovesLearnset
         {
             get => EnableAutoCorrect && _autoCorrectMovesLearnset;
@@ -236,7 +236,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectEVs = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la autocorrección corregirá los EVs erróneos."), DisplayName("Autocorrección de EVs")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong EVs."), DisplayName("Auto Correct EVs")]
         public bool AutoCorrectEVs
         {
             get => EnableAutoCorrect && _autoCorrectEVs;
@@ -245,7 +245,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectIVs = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá los IV erróneos."), DisplayName("Autocorrección de IVs")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong IVs."), DisplayName("Auto Correct IVs")]
         public bool AutoCorrectIVs
         {
             get => EnableAutoCorrect && _autoCorrectIVs;
@@ -254,7 +254,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private bool _autoCorrectMarks = true;
 
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá las marcas/cintas incorrectas."), DisplayName("Autocorrección de Marcas/Cintas")]
+        [Category(nameof(AutoCorrectShowdownCategory)), Description("If set to True, auto correction will correct wrong Marks/Ribbons."), DisplayName("Auto Correct Marks/Ribbons")]
         public bool AutoCorrectMarks
         {
             get => EnableAutoCorrect && _autoCorrectMarks;
@@ -265,11 +265,11 @@ public class TradeSettings : IBotStateSettings, ICountSettings
     [Category(EmbedSettings), TypeConverter(typeof(CategoryConverter<TradeEmbedSettingsCategory>))]
     public class TradeEmbedSettingsCategory
     {
-        public override string ToString() => "Ajustes de configuración de Trade Embed";
+        public override string ToString() => "Trade Embed Configuration Settings";
 
         private bool _useEmbeds = true;
 
-        [Category(EmbedSettings), Description("Si es verdadero, mostrará hermosos embeds en sus canales de trade de discord de lo que el usuario este tradeando. False mostrará el texto por defecto."), DisplayName("Usar Embeds")]
+        [Category(EmbedSettings), Description("If true, will show beautiful embeds in your discord trade channels of what the user is trading. False will show default text."), DisplayName("Use Embeds")]
         public bool UseEmbeds
         {
             get => _useEmbeds;
@@ -284,7 +284,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
         {
             if (!_useEmbeds)
             {
-                PreferredImageSize = ImageSize.Size128x128;
+                PreferredImageSize = ImageSize.Size256x256;
                 MoveTypeEmojis = false;
                 ShowScale = false;
                 ShowTeraType = false;
@@ -296,36 +296,13 @@ public class TradeSettings : IBotStateSettings, ICountSettings
             }
         }
 
-        [Category(EmbedSettings), Description("Tamaño preferido de la imagen de la especie para embeds."), DisplayName("Tamaño de la imagen del Pokémon")]
-        public ImageSize PreferredImageSize { get; set; } = ImageSize.Size128x128;
+        [Category(EmbedSettings), Description("Preferred Species Image Size for Embeds."), DisplayName("Species Image Size")]
+        public ImageSize PreferredImageSize { get; set; } = ImageSize.Size256x256;
 
-        [Category(EmbedSettings), TypeConverter(typeof(ExpandableObjectConverter)), Description("Opciones Extras para el embed"), DisplayName("Opciones Extras")]
-        public EmbedTxTOptions ExtraEmbedOptions { get; set; } = new EmbedTxTOptions();
-
-        public class EmbedTxTOptions
-        {
-            public override string ToString() => "(Collection)";
-
-            [Category(EmbedSettings), Description("URL que aparece al hacer click en el titulo de embed."), DisplayName("URL del título del Embed")]
-            public string TradingBotUrl { get; set; } = "";
-
-            [Category(EmbedSettings), Description("Mensaje que aparece en el embed cuando el Pokémon solicitado no es nativo del juego actual."), DisplayName("Texto para Pokémon no nativo")]
-            public string NonNativeTexT { get; set; } = "*Puede que no pueda ir a HOME y AutoOT no fue aplicado.*";
-
-            [Category(EmbedSettings), Description("Mensaje que aparece en el embed cuando el Bot autocorrige algún dato del conjunto enviado.."), DisplayName("Texto para autocorrección")]
-            public string AutocorrectText { get; set; } = "Auto corregido para hacerlo legal.";
-        }
-
-        [Category(EmbedSettings), Description("Mostrará los iconos de tipo de movimiento junto a los movimientos en el Embed Trade (sólo Discord). Requiere que el usuario suba los emojis a su servidor."), DisplayName("¿Mostrar Emojis de Movimientos?")]
+        [Category(EmbedSettings), Description("Will show Move Type Icons next to moves in trade embed (Discord only). Requires user to upload the emojis to their server."), DisplayName("Show Move Type Emojis")]
         public bool MoveTypeEmojis { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Mostrará los iconos de Tera Tipo junto a los movimientos en el Embed Trade (sólo Discord). Requiere que el usuario suba los emojis a su servidor."), DisplayName("¿Mostrar Emojis de Tipo Tera?")]
-        public bool UseTeraEmojis { get; set; } = true;
-
-        [Category(EmbedSettings), Description("Si es verdadero, se mostrarán los emojis para las escalas XXXS y XXXL en el Embed Trade."), DisplayName("¿Usar Emojis de Tamaño?")]
-        public bool UseScaleEmojis { get; set; } = true;
-
-        [Category(EmbedSettings), Description("Información personalizada de Emoji para los tipos de movimiento."), DisplayName("Emojis de Movimientos")]
+        [Category(EmbedSettings), Description("Custom Emoji information for the move types."), DisplayName("Custom Type Emojis")]
         public List<MoveTypeEmojiInfo> CustomTypeEmojis { get; set; } = new List<MoveTypeEmojiInfo>
         {
             new(MoveType.Bug),
@@ -349,7 +326,28 @@ public class TradeSettings : IBotStateSettings, ICountSettings
             new(MoveType.Stellar)
         };
 
-        [Category(EmbedSettings), Description("Configuración de emojis para todos los tipos Tera, incluyendo 'Stellar'."), DisplayName("Emojis de Tipo Tera")]
+        [Category(EmbedSettings), Description("The full string for the male gender emoji."), DisplayName("Male Emoji")]
+        public EmojiInfo MaleEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("The full string for the female gender emoji."), DisplayName("Female Emoji")]
+        public EmojiInfo FemaleEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("The emoji information for displaying mystery gift status."), DisplayName("Mystery Gift Emoji")]
+        public EmojiInfo MysteryGiftEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("The emoji information for displaying the alpha mark."), DisplayName("Alpha Mark Emoji")]
+        public EmojiInfo AlphaMarkEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("The emoji information for displaying the mightiest mark."), DisplayName("Mightiest Mark Emoji")]
+        public EmojiInfo MightiestMarkEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("The emoji information for displaying the alpha emoji in Legends: Arceus."), DisplayName("Alpha PLA Emoji")]
+        public EmojiInfo AlphaPLAEmoji { get; set; } = new EmojiInfo();
+
+        [Category(EmbedSettings), Description("Will show Move Type Icons next to moves in trade embed (Discord only). Requires user to upload the emojis to their server."), DisplayName("Show Tera Type Emojis?")]
+        public bool UseTeraEmojis { get; set; } = true;
+
+        [Category(EmbedSettings), Description("Tera Type Emoji information for the tera types."), DisplayName("Custom Tera Type Emojis")]
         public List<TeraTypeEmojiInfo> TeraTypeEmojis { get; set; } = new List<TeraTypeEmojiInfo>
         {
             new(MoveType.Bug),
@@ -373,118 +371,58 @@ public class TradeSettings : IBotStateSettings, ICountSettings
             new(MoveType.Stellar)
         };
 
-        [Category(EmbedSettings), TypeConverter(typeof(ExpandableObjectConverter)), Description("Configuración de emojis para las escalas XXXS y XXXL."), DisplayName("Emojis de tamaño")]
-        public ScaleEmojisSettings ScaleEmojis { get; set; } = new ScaleEmojisSettings();
-
-        public class ScaleEmojisSettings
-        {
-            public override string ToString() => "(Collection)";
-
-            [Description("Emoji para la escala XXXS."), DisplayName("Emoji Escala XXXS")]
-            public EmojiInfo ScaleXXXSEmoji { get; set; } = new EmojiInfo();
-
-            [Description("Emoji para la escala XXXL."), DisplayName("Emoji Escala XXXL")]
-            public EmojiInfo ScaleXXXLEmoji { get; set; } = new EmojiInfo();
-        }
-
-        [Category(EmbedSettings), TypeConverter(typeof(ExpandableObjectConverter)), Description("Configuración de emojis para Pokémon Shiny."), DisplayName("Emojis Shiny")]
-        public ShinyEmojisSettings ShinyEmojis { get; set; } = new ShinyEmojisSettings();
-
-        public class ShinyEmojisSettings
-        {
-            public override string ToString() => "(Collection)";
-
-            [Description("Emoji para Pokémon con Shiny Square."), DisplayName("Emoji Shiny Square")]
-            public EmojiInfo ShinySquareEmoji { get; set; } = new EmojiInfo();
-
-            [Description("Emoji para Pokémon Shiny normal."), DisplayName("Emoji Shiny Normal")]
-            public EmojiInfo ShinyNormalEmoji { get; set; } = new EmojiInfo();
-        }
-
-        [Category(EmbedSettings), TypeConverter(typeof(ExpandableObjectConverter)), Description("Configuración de emojis para géneros."), DisplayName("Emojis de Género")]
-        public GenderEmojisSettings GenderEmojis { get; set; } = new GenderEmojisSettings();
-
-        public class GenderEmojisSettings
-        {
-            public override string ToString() => "(Collection)";
-
-            [Description("La cadena completa para el emoji de género masculino."), DisplayName("Emoji Masculino")]
-            public EmojiInfo MaleEmoji { get; set; } = new EmojiInfo();
-
-            [Description("La cadena completa para el emoji de género femenino."), DisplayName("Emoji Femenino")]
-            public EmojiInfo FemaleEmoji { get; set; } = new EmojiInfo();
-        }
-
-        [Category(EmbedSettings), TypeConverter(typeof(ExpandableObjectConverter)), Description("Configuración de emojis para marcas especiales y estados."), DisplayName("Emojis de Marcas y Estados Especiales")]
-        public SpecialMarksEmojisSettings SpecialMarksEmojis { get; set; } = new SpecialMarksEmojisSettings();
-
-        public class SpecialMarksEmojisSettings
-        {
-            public override string ToString() => "(Collection)";
-
-            [Description("La información del emoji para mostrar el estado del regalo misterioso."), DisplayName("Emoji Regalo Misterioso")]
-            public EmojiInfo MysteryGiftEmoji { get; set; } = new EmojiInfo();
-
-            [Description("La información del emoji para mostrar la marca alfa."), DisplayName("Emoji Marca Alfa")]
-            public EmojiInfo AlphaMarkEmoji { get; set; } = new EmojiInfo();
-
-            [Description("La información emoji para mostrar la marca Imbatible."), DisplayName("Emoji Imbatible")]
-            public EmojiInfo MightiestMarkEmoji { get; set; } = new EmojiInfo();
-
-            [Description("La información emoji para mostrar el emoji alfa en Legends: Arceus."), DisplayName("Emoji Alfa PLA")]
-            public EmojiInfo AlphaPLAEmoji { get; set; } = new EmojiInfo();
-        }
-
-        [Category(EmbedSettings), Description("Se mostrará la Escala en el Embed Trade (SV y Discord solamente). Requiere que el usuario suba los emojis a su servidor."), DisplayName("Mostrar Tamaño")]
+        [Category(EmbedSettings), Description("Will show Scale in trade embed (SV & Discord only). Requires user to upload the emojis to their server."), DisplayName("Show Scale")]
         public bool ShowScale { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Mostrará el Tera Tipo en el Embed Trade (sólo SV y Discord)."), DisplayName("Mostrar Tera Tipo")]
+        [Category(EmbedSettings), Description("Will show Tera Type in trade embed (SV & Discord only)."), DisplayName("Show Tera Type")]
         public bool ShowTeraType { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Se mostrará el nivel en el Embed Trade (Discord solamente)."), DisplayName("Mostrar Nivel")]
+        [Category(EmbedSettings), Description("Will show Level in trade embed (Discord only)."), DisplayName("Show Level")]
         public bool ShowLevel { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Mostrará MetDate en el Embed Trade (sólo Discord)."), DisplayName("Mostrar Fecha de Encuentro")]
+        [Category(EmbedSettings), Description("Will show MetDate in trade embed (Discord only)."), DisplayName("Show Met Date")]
         public bool ShowMetDate { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Se mostrará Habilidad en el Embed Trade (Discord solamente)."), DisplayName("Mostrar Habilidad")]
+        [Category(EmbedSettings), Description("Will show Ability in trade embed (Discord only)."), DisplayName("Show Ability")]
         public bool ShowAbility { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Se mostrará la naturaleza en el Embed Trade (Discord solamente)."), DisplayName("Mostrar Naturaleza")]
+        [Category(EmbedSettings), Description("Will show Nature in trade embed (Discord only)."), DisplayName("Show Nature")]
         public bool ShowNature { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Mostrará IVs en el Embed Trade (Discord solamente)."), DisplayName("Mostrar IVs")]
+        [Category(EmbedSettings), Description("Will show IVs in trade embed (Discord only)."), DisplayName("Show IVs")]
         public bool ShowIVs { get; set; } = true;
 
-        [Category(EmbedSettings), Description("Mostrará los EVs en el Embed Trade (sólo Discord)."), DisplayName("Mostrar EVs")]
+        [Category(EmbedSettings), Description("Will show EVs in trade embed (Discord only)."), DisplayName("Show EVs")]
         public bool ShowEVs { get; set; } = true;
     }
 
     [Category(VGCPastesConfig), TypeConverter(typeof(CategoryConverter<VGCPastesCategory>))]
     public class VGCPastesCategory
     {
-        public override string ToString() => "Ajustes de configuración de VGCPastes";
+        public override string ToString() => "VGCPastes Configuration Settings";
 
-        [Category(VGCPastesConfig), Description("Permitir a los usuarios solicitar y generar equipos utilizando la hoja de cálculo VGCPastes."), DisplayName("Permitir solicitudes VGCPaste")]
+        [Category(VGCPastesConfig), Description("Allow users to request and generate teams using the VGCPastes Spreadsheet."), DisplayName("Allow VGC Paste Requests")]
         public bool AllowRequests { get; set; } = true;
 
-        [Category(VGCPastesConfig), Description("GID de la pestaña de la hoja de cálculo de la que desea extraer datos.  Sugerencia: https://docs.google.com/spreadsheets/d/ID/gid=1837599752"), DisplayName("GID de la hoja de cálculo")]
+        [Category(VGCPastesConfig), Description("GID of Spreadsheet tab you would like to pull from. Hint: https://docs.google.com/spreadsheets/d/ID/gid=1837599752"), DisplayName("GID of Spreadsheet Tab")]
         public int GID { get; set; } = 1837599752; // Reg F Tab
     }
 
     [Category(RequestFolders), TypeConverter(typeof(CategoryConverter<RequestFolderSettingsCategory>))]
     public class RequestFolderSettingsCategory
     {
-        public override string ToString() => "Configuración de las carpetas de solicitud";
+        public override string ToString() => "Request Folders Settings";
 
-        [Category("RequestFolders"), Description("Ruta a su carpeta de eventos. Crea una nueva carpeta llamada 'eventos' y copia la ruta aquí."), DisplayName("Ruta de la carpeta de eventos")]
+        [Category("RequestFolders"), Description("Path to your Events Folder. Create a new folder called 'events' and copy the path here."), DisplayName("Events Folder Path")]
         public string EventsFolder { get; set; } = string.Empty;
 
-        [Category("RequestFolders"), Description("Ruta a tu carpeta BattleReady. Crea una nueva carpeta llamada 'battleready' y copia la ruta aquí."), DisplayName("Ruta de la carpeta Battle-Ready")]
+        [Category("RequestFolders"), Description("Path to your BattleReady Folder. Create a new folder called 'battleready' and copy the path here."), DisplayName("Battle-Ready Folder Path")]
         public string BattleReadyPKMFolder { get; set; } = string.Empty;
     }
 
-    [Category(Miscellaneous), Description("Apaga la pantalla de la Switch durante las operaciones"), DisplayName("Apagar Pantalla")]
+    [Category(Miscellaneous)]
+    [Description("Turns off the Switch's screen during trades")]
+    [DisplayName("Screen Off")]
     public bool ScreenOff { get; set; } = false;
 
     /// <summary>
@@ -518,7 +456,7 @@ public class TradeSettings : IBotStateSettings, ICountSettings
     [Category(CountStats), TypeConverter(typeof(CategoryConverter<CountStatsSettingsCategory>))]
     public class CountStatsSettingsCategory
     {
-        public override string ToString() => "Estadísticas del recuento de trades";
+        public override string ToString() => "Trade Count Statistics";
 
         private int _completedSurprise;
 
@@ -534,28 +472,28 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
         private int _completedFixOTs;
 
-        [Category(CountStats), Description("Trades sorpresas finalizados")]
+        [Category(CountStats), Description("Completed Surprise Trades")]
         public int CompletedSurprise
         {
             get => _completedSurprise;
             set => _completedSurprise = value;
         }
 
-        [Category(), Description("Trades de enlaces finalizados (distribución)")]
+        [Category(), Description("Completed Link Trades (Distribution)")]
         public int CompletedDistribution
         {
             get => _completedDistribution;
             set => _completedDistribution = value;
         }
 
-        [Category(CountStats), Description("Trade de enlace completados (usuario específico)")]
+        [Category(CountStats), Description("Completed Link Trades (Specific User)")]
         public int CompletedTrades
         {
             get => _completedTrades;
             set => _completedTrades = value;
         }
 
-        [Category(CountStats), Description("Trades FixOT completados (Usuario específico)")]
+        [Category(CountStats), Description("Completed FixOT Trades (Specific User)")]
         public int CompletedFixOTs
         {
             get => _completedFixOTs;
@@ -563,28 +501,28 @@ public class TradeSettings : IBotStateSettings, ICountSettings
         }
 
         [Browsable(false)]
-        [Category(CountStats), Description("Trades de control de semillas finalizadas")]
+        [Category(CountStats), Description("Completed Seed Check Trades")]
         public int CompletedSeedChecks
         {
             get => _completedSeedChecks;
             set => _completedSeedChecks = value;
         }
 
-        [Category(CountStats), Description("Trades de clonacion completados (usuario específico)")]
+        [Category(CountStats), Description("Completed Clone Trades (Specific User)")]
         public int CompletedClones
         {
             get => _completedClones;
             set => _completedClones = value;
         }
 
-        [Category(CountStats), Description("Trades de Dumps finalizados (usuario específico)")]
+        [Category(CountStats), Description("Completed Dump Trades (Specific User)")]
         public int CompletedDumps
         {
             get => _completedDumps;
             set => _completedDumps = value;
         }
 
-        [Category(CountStats), Description("Si se activa, los recuentos se emitirán cuando se solicite una comprobación de estado.")]
+        [Category(CountStats), Description("When enabled, the counts will be emitted when a status check is requested.")]
         public bool EmitCountsOnStatusCheck { get; set; }
 
         public void AddCompletedTrade() => Interlocked.Increment(ref _completedTrades);
@@ -622,7 +560,6 @@ public class TradeSettings : IBotStateSettings, ICountSettings
         }
     }
 
-    [Description("Controla si los recuentos de estadísticas de operaciones se emiten durante las comprobaciones de estado."), DisplayName("Emitir Recuentos al Comprobar Estado")]
     public bool EmitCountsOnStatusCheck
     {
         get => CountStatsSettings.EmitCountsOnStatusCheck;
@@ -676,9 +613,9 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
     public class MoveTypeEmojiInfo
     {
-        [Description("El tipo de movimiento.")]
+        [Description("The type of move.")]
         public MoveType MoveType { get; set; }
-        [Description("La cadena de emoji de Discord para este tipo de movimiento.")]
+        [Description("The Discord emoji string for this move type.")]
         public string EmojiCode { get; set; } = string.Empty;
         public MoveTypeEmojiInfo()
         { }
@@ -697,9 +634,9 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
     public class TeraTypeEmojiInfo
     {
-        [Description("El tipo Tera.")]
+        [Description("The Tera Type.")]
         public MoveType MoveType { get; set; }
-        [Description("La cadena de emojis de Discord para este tipo de tera.")]
+        [Description("The Discord emoji string for this tera type.")]
         public string EmojiCode { get; set; }
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public TeraTypeEmojiInfo()

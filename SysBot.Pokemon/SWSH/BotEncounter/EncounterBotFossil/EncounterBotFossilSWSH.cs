@@ -30,31 +30,31 @@ public class EncounterBotFossilSWSH : EncounterBotSWSH
     {
         await SetupBoxState(DumpSetting, token).ConfigureAwait(false);
 
-        Log("Comprobando el recuento de items...");
+        Log("Checking item counts...");
         var pouchData = await Connection.ReadBytesAsync(ItemTreasureAddress, 80, token).ConfigureAwait(false);
         var counts = FossilCount.GetFossilCounts(pouchData);
         int reviveCount = counts.PossibleRevives(Settings.Species);
         if (reviveCount == 0)
         {
-            Log("Piezas fósiles insuficientes. Primero obtenga al menos una de cada pieza fósil requerida.");
+            Log("Insufficient fossil pieces. Please obtain at least one of each required fossil piece first.");
             return;
         }
-        Log($"Hay suficientes piezas fósiles disponibles para revivir {reviveCount} {Settings.Species}.");
+        Log($"Enough fossil pieces are available to revive {reviveCount} {Settings.Species}.");
 
         while (!token.IsCancellationRequested)
         {
             if (encounterCount != 0 && encounterCount % reviveCount == 0)
             {
-                Log($"Se quedaron sin fósiles para revivir {Settings.Species}.");
+                Log($"Ran out of fossils to revive {Settings.Species}.");
                 if (Settings.InjectWhenEmpty)
                 {
-                    Log("Restaurando los datos originales de la bolsa.");
+                    Log("Restoring original pouch data.");
                     await Connection.WriteBytesAsync(pouchData, ItemTreasureAddress, token).ConfigureAwait(false);
                     await Task.Delay(500, token).ConfigureAwait(false);
                 }
                 else
                 {
-                    Log("Los restos fósiles se han agotado. Reiniciando el juego.");
+                    Log("Fossil pieces have been depleted. Resetting the game.");
                     await CloseGame(Hub.Config, token).ConfigureAwait(false);
                     await StartGame(Hub.Config, token).ConfigureAwait(false);
                     await SetupBoxState(DumpSetting, token).ConfigureAwait(false);
@@ -62,26 +62,26 @@ public class EncounterBotFossilSWSH : EncounterBotSWSH
             }
 
             await ReviveFossil(counts, token).ConfigureAwait(false);
-            Log("Fósil revivió. Comprobando detalles...");
+            Log("Fossil revived. Checking details...");
 
             var pk = await ReadBoxPokemon(0, 0, token).ConfigureAwait(false);
             if (pk.Species == 0 || !pk.ChecksumValid)
             {
-                Log("No se encontró ningún fósil en la casilla 1, ranura 1. Asegúrate de que el grupo esté lleno. Reiniciando bucle.");
+                Log("No fossil found in Box 1, slot 1. Ensure that the party is full. Restarting loop.");
                 continue;
             }
 
             if (await HandleEncounter(pk, token).ConfigureAwait(false))
                 return;
 
-            Log("Borrando la ranura de destino.");
+            Log("Clearing destination slot.");
             await SetBoxPokemon(Blank, 0, 0, token).ConfigureAwait(false);
         }
     }
 
     private async Task ReviveFossil(FossilCount count, CancellationToken token)
     {
-        Log("Iniciando rutina de recuperación de fósiles...");
+        Log("Starting fossil revival routine...");
         if (GameLang == LanguageID.Spanish)
             await Click(A, 0_900, token).ConfigureAwait(false);
 

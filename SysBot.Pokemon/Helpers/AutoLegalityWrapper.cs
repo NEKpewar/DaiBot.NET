@@ -158,7 +158,7 @@ public static class AutoLegalityWrapper
         if (typeof(T) == typeof(PB7))
             return TrainerSettings.GetSavedTrainerData(GameVersion.GE, 7);
 
-        throw new ArgumentException("El tipo no tiene un entrenador de búsqueda reconocido.", typeof(T).Name);
+        throw new ArgumentException("Type does not have a recognized trainer fetch.", typeof(T).Name);
     }
 
     public static ITrainerInfo GetTrainerInfo(byte gen) => TrainerSettings.GetSavedTrainerData(gen);

@@ -21,48 +21,48 @@ public class EncounterSettings : IBotStateSettings, ICountSettings
 
     private int _completedWild;
 
-    [Category(Counts), Description("Huevos recuperados")]
+    [Category(Counts), Description("Eggs Retrieved")]
     public int CompletedEggs
     {
         get => _completedEggs;
         set => _completedEggs = value;
     }
 
-    [Category(Counts), Description("Pokémon salvajes encontrados")]
+    [Category(Counts), Description("Encountered Wild Pokémon")]
     public int CompletedEncounters
     {
         get => _completedWild;
         set => _completedWild = value;
     }
 
-    [Category(Counts), Description("Pokémon fósiles revividos")]
+    [Category(Counts), Description("Fossil Pokémon Revived")]
     public int CompletedFossils
     {
         get => _completedFossils;
         set => _completedFossils = value;
     }
 
-    [Category(Counts), Description("Pokémon legendarios encontrados")]
+    [Category(Counts), Description("Encountered Legendary Pokémon")]
     public int CompletedLegends
     {
         get => _completedLegend;
         set => _completedLegend = value;
     }
 
-    [Category(Encounter), Description("Cuando esté habilitado, el bot continuará después de encontrar una coincidencia adecuada.")]
+    [Category(Encounter), Description("When enabled, the bot will continue after finding a suitable match.")]
     public ContinueAfterMatch ContinueAfterMatch { get; set; } = ContinueAfterMatch.StopExit;
 
-    [Category(Counts), Description("Cuando está habilitado, los recuentos se emitirán cuando se solicite una verificación de estado.")]
+    [Category(Counts), Description("When enabled, the counts will be emitted when a status check is requested.")]
     public bool EmitCountsOnStatusCheck { get; set; }
 
-    [Category(Encounter), Description("El método utilizado por los Bots Line y Reset para encontrar Pokémon.")]
+    [Category(Encounter), Description("The method used by the Line and Reset bots to encounter Pokémon.")]
     public EncounterMode EncounteringType { get; set; } = EncounterMode.VerticalLine;
 
     [Category(Settings)]
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public FossilSettings Fossil { get; set; } = new();
 
-    [Category(Encounter), Description("Cuando está habilitado, la pantalla se apagará durante la operación normal del bucle del bot para ahorrar energía.")]
+    [Category(Encounter), Description("When enabled, the screen will be turned off during normal bot loop operation to save power.")]
     public bool ScreenOff { get; set; }
 
     public int AddCompletedEggs() => Interlocked.Increment(ref _completedEggs);
@@ -78,14 +78,14 @@ public class EncounterSettings : IBotStateSettings, ICountSettings
         if (!EmitCountsOnStatusCheck)
             yield break;
         if (CompletedEncounters != 0)
-            yield return $"Encuentros salvajes: {CompletedEncounters}";
+            yield return $"Wild Encounters: {CompletedEncounters}";
         if (CompletedLegends != 0)
-            yield return $"Encuentros legendarios: {CompletedLegends}";
+            yield return $"Legendary Encounters: {CompletedLegends}";
         if (CompletedEggs != 0)
-            yield return $"Huevos recibidos: {CompletedEggs}";
+            yield return $"Eggs Received: {CompletedEggs}";
         if (CompletedFossils != 0)
-            yield return $"Fósiles completados: {CompletedFossils}";
+            yield return $"Completed Fossils: {CompletedFossils}";
     }
 
-    public override string ToString() => "Configuración SWSH del robot de encuentro";
+    public override string ToString() => "Encounter Bot SWSH Settings";
 }

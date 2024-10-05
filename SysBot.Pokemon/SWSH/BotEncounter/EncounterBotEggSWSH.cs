@@ -52,7 +52,7 @@ public class EncounterBotEggSWSH : EncounterBotSWSH
             if (attempts < 0) // aborted
                 return;
 
-            Log($"¡Huevo disponible después de {attempts} intentos! Borrando la ranura de destino.");
+            Log($"Egg available after {attempts} attempts! Clearing destination slot.");
             await SetBoxPokemon(Blank, 0, 0, token).ConfigureAwait(false);
 
             for (int i = 0; i < 10; i++)
@@ -66,7 +66,7 @@ public class EncounterBotEggSWSH : EncounterBotSWSH
             var pk = await ReadBoxPokemon(0, 0, token).ConfigureAwait(false);
             if (pk.Species == 0)
             {
-                Log("No se encontró ningún huevo en la casilla 1, ranura 1. Asegúrate de que el grupo esté lleno. Reiniciando bucle.");
+                Log("No egg found in Box 1, slot 1. Ensure that the party is full. Restarting loop.");
                 continue;
             }
 
@@ -77,7 +77,7 @@ public class EncounterBotEggSWSH : EncounterBotSWSH
 
     private async Task<int> StepUntilEgg(CancellationToken token)
     {
-        Log("Caminando hasta que un huevo esté listo...");
+        Log("Walking around until an egg is ready...");
         int attempts = 0;
         while (!token.IsCancellationRequested && Config.NextRoutineType == PokeRoutineType.EggFetch)
         {
@@ -97,7 +97,7 @@ public class EncounterBotEggSWSH : EncounterBotSWSH
 
             attempts++;
             if (attempts % 10 == 0)
-                Log($"Lo intenté {attempts} veces, pero todavía no hay huevo.");
+                Log($"Tried {attempts} times, still no egg.");
 
             if (attempts > 10)
                 await Click(B, 500, token).ConfigureAwait(false);

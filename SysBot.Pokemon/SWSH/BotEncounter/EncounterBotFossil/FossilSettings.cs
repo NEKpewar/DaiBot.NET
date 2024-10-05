@@ -11,11 +11,11 @@ public class FossilSettings
     /// <summary>
     /// Toggle for injecting fossil pieces.
     /// </summary>
-    [Category(Fossil), Description("Alternar para inyectar piezas fósiles.")]
+    [Category(Fossil), Description("Toggle for injecting fossil pieces.")]
     public bool InjectWhenEmpty { get; set; }
 
-    [Category(Fossil), Description("Especies de Pokémon fósiles para cazar.")]
+    [Category(Fossil), Description("Species of fossil Pokémon to hunt for.")]
     public FossilSpecies Species { get; set; } = FossilSpecies.Dracozolt;
 
-    public override string ToString() => "Configuración del Bot fósil";
+    public override string ToString() => "Fossil Bot Settings";
 }

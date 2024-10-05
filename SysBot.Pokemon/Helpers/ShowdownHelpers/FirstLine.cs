@@ -77,9 +77,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
         {
             if (!string.IsNullOrEmpty(heldItem))
             {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 string correctedHeldItem = GetClosestItem(heldItem, itemlist);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (correctedHeldItem != null)
                 {
                     int itemIndex = Array.IndexOf(itemlist, correctedHeldItem);
@@ -87,20 +85,20 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                     {
                         if (correctedHeldItem != heldItem)
                         {
-                            string correctionMessage = $"- El Item sostenido por el Pokemon era incorrecto. Se ha ajustado de **{heldItem}** a **{correctedHeldItem}**.";
+                            string correctionMessage = $"Held item was incorrect. Adjusted from **{heldItem}** to **{correctedHeldItem}**.";
                             return (correctedHeldItem, correctionMessage);
                         }
                         return (heldItem, string.Empty); // Item was valid, no correction needed
                     }
                     else
                     {
-                        string correctionMessage = $"- El Item sostenido por el Pokemon: **{heldItem}**, no está permitido, Se ha eliminado.";
+                        string correctionMessage = $"Held item **{heldItem}** is not allowed. Removed the held item.";
                         return (string.Empty, correctionMessage);
                     }
                 }
                 else
                 {
-                    string correctionMessage = $"- El Item sostenido por el Pokemon: **{heldItem}** no se ha reconocido y se ha eliminado.";
+                    string correctionMessage = $"Held item **{heldItem}** is not recognized. Removed the held item.";
                     return (string.Empty, correctionMessage); // Return empty string for unrecognized item
                 }
             }
@@ -134,12 +132,12 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                 if (personalInfo.Genderless)
                 {
                     gender = string.Empty;
-                    correctionMessage = $"- {speciesName} no puede tener genero. Eliminando el género.";
+                    correctionMessage = $"{speciesName} is genderless. Removing gender.";
                 }
                 else if ((personalInfo.OnlyFemale && genderValue != "F") || (personalInfo.OnlyMale && genderValue != "M"))
                 {
                     gender = string.Empty;
-                    correctionMessage = $"- {speciesName} no puede ser {genderValue}. Eliminando el género.";
+                    correctionMessage = $"{speciesName} can't be {genderValue}. Removing gender.";
                 }
             }
             return (gender, correctionMessage);

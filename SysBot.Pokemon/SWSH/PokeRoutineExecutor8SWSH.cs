@@ -27,7 +27,7 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
     public async Task CleanExit(CancellationToken token)
     {
         await SetScreen(ScreenState.On, token).ConfigureAwait(false);
-        Log("Desconexión de controladores al salir de rutina.");
+        Log("Detaching controllers on routine exit.");
         await DetachController(token).ConfigureAwait(false);
     }
 
@@ -36,17 +36,17 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
         var timing = config.Timings;
 
         // Close out of the game
-        await Click(HOME, 2_000 + timing.ExtraTimeReturnHome, token).ConfigureAwait(false);
+        await Click(HOME, 2_000 + timing.ClosingGameSettings.ExtraTimeReturnHome, token).ConfigureAwait(false);
         await Click(X, 1_000, token).ConfigureAwait(false);
-        await Click(A, 5_000 + timing.ExtraTimeCloseGame, token).ConfigureAwait(false);
-        Log("Cerre el juego!");
+        await Click(A, 5_000 + timing.ClosingGameSettings.ExtraTimeCloseGame, token).ConfigureAwait(false);
+        Log("Closed out of the game!");
     }
 
     public async Task EnsureConnectedToYComm(ulong overworldOffset, PokeTradeHubConfig config, CancellationToken token)
     {
         if (!await IsGameConnectedToYComm(token).ConfigureAwait(false))
         {
-            Log("Reconectándose a Y-Comm...");
+            Log("Reconnecting to Y-Comm...");
             await ReconnectToYComm(overworldOffset, config, token).ConfigureAwait(false);
         }
     }
@@ -90,36 +90,36 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
         // Check title so we can warn if mode is incorrect.
         string title = await SwitchConnection.GetTitleID(token).ConfigureAwait(false);
         if (title is not (SwordID or ShieldID))
-            throw new Exception($"{title} no es un título SWSH válido. ¿Tu modo es correcto?");
+            throw new Exception($"{title} is not a valid SWSH title. Is your mode correct?");
 
         // Verify the game version.
         var game_version = await SwitchConnection.GetGameInfo("version", token).ConfigureAwait(false);
         if (!game_version.SequenceEqual(SWSHGameVersion))
-            throw new Exception($"La versión del juego no es compatible. Versión esperada {SWSHGameVersion} y la versión actual del juego es {game_version}.");
+            throw new Exception($"Game version is not supported. Expected version {SWSHGameVersion}, and current game version is {game_version}.");
 
-        Log("Tomando datos del entrenador de la consola host...");
+        Log("Grabbing trainer data of host console...");
         var sav = await GetFakeTrainerSAV(token).ConfigureAwait(false);
         InitSaveData(sav);
 
         if (!IsValidTrainerData())
         {
             await CheckForRAMShiftingApps(token).ConfigureAwait(false);
-            throw new Exception("Consulte la wiki de SysBot.NET (https://github.com/kwsch/SysBot.NET/wiki/Troubleshooting) para obtener más información.");
+            throw new Exception("Refer to the SysBot.NET wiki (https://github.com/kwsch/SysBot.NET/wiki/Troubleshooting) for more information.");
         }
 
         if (await GetTextSpeed(token).ConfigureAwait(false) < TextSpeedOption.Fast)
-            throw new Exception("La velocidad del texto debe configurarse en RÁPIDO. Solucione esto para un funcionamiento correcto.");
+            throw new Exception("Text speed should be set to FAST. Fix this for correct operation.");
 
         return sav;
     }
 
     public async Task InitializeHardware(IBotStateSettings settings, CancellationToken token)
     {
-        Log("Desconectando al inicio.");
+        Log("Detaching on startup.");
         await DetachController(token).ConfigureAwait(false);
         if (settings.ScreenOff)
         {
-            Log("Apagando la pantalla.");
+            Log("Turning off screen.");
             await SetScreen(ScreenState.Off, token).ConfigureAwait(false);
         }
     }
@@ -208,7 +208,7 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
 
         // Press it twice for safety -- sometimes misses it the first time.
         await Click(PLUS, 2_000, token).ConfigureAwait(false);
-        await Click(PLUS, 5_000 + config.Timings.ExtraTimeConnectOnline, token).ConfigureAwait(false);
+        await Click(PLUS, 5_000 + config.Timings.MiscellaneousSettings.ExtraTimeConnectOnline, token).ConfigureAwait(false);
 
         for (int i = 0; i < 5; i++)
         {
@@ -219,7 +219,7 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
     public async Task ReOpenGame(PokeTradeHubConfig config, CancellationToken token)
     {
         // Reopen the game if we get soft-banned
-        Log("Se detectó una posible prohibición suave, ¡reabriendo el juego por si acaso!");
+        Log("Potential soft ban detected, reopening game just in case!");
         await CloseGame(config, token).ConfigureAwait(false);
         await StartGame(config, token).ConfigureAwait(false);
 
@@ -259,41 +259,56 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
         var existing = await ReadBoxPokemon(0, 0, token).ConfigureAwait(false);
         if (existing.Species != 0 && existing.ChecksumValid)
         {
-            Log("¡El espacio de destino está ocupado! Tirando los Pokémon encontrados allí...");
+            Log("Destination slot is occupied! Dumping the Pokémon found there...");
             DumpPokemon(DumpSetting.DumpFolder, "saved", existing);
         }
 
-        Log("Limpiar la ranura de destino para iniciar el bot.");
+        Log("Clearing destination slot to start the bot.");
         PK8 blank = new();
         await SetBoxPokemon(blank, 0, 0, token).ConfigureAwait(false);
     }
 
     public async Task StartGame(PokeTradeHubConfig config, CancellationToken token)
     {
-        var timing = config.Timings;
 
         // Open game.
-        await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+        var timing = config.Timings;
+        var loadPro = timing.OpeningGameSettings.ProfileSelectionRequired ? timing.OpeningGameSettings.ExtraTimeLoadProfile : 0;
+
+        await Click(A, 1_000 + loadPro, token).ConfigureAwait(false); // Initial "A" Press to start the Game + a delay if needed for profiles to load
 
         // Menus here can go in the order: Update Prompt -> Profile -> DLC check -> Unable to use DLC.
         //  The user can optionally turn on the setting if they know of a breaking system update incoming.
-        if (timing.AvoidSystemUpdate)
+        if (timing.MiscellaneousSettings.AvoidSystemUpdate)
         {
             await Click(DUP, 0_600, token).ConfigureAwait(false);
-            await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+            await Click(A, 1_000 + timing.OpeningGameSettings.ExtraTimeLoadProfile, token).ConfigureAwait(false);
         }
 
-        await Click(A, 1_000 + timing.ExtraTimeCheckDLC, token).ConfigureAwait(false);
+        // Only send extra Presses if we need to
+        if (timing.OpeningGameSettings.ProfileSelectionRequired)
+        {
+            await Click(A, 1_000, token).ConfigureAwait(false); // Now we are on the Profile Screen
+            await Click(A, 1_000, token).ConfigureAwait(false); // Select the profile
+        }
+
+        // Digital game copies take longer to load
+        if (timing.OpeningGameSettings.CheckGameDelay)
+        {
+            await Task.Delay(2_000 + timing.OpeningGameSettings.ExtraTimeCheckGame, token).ConfigureAwait(false);
+        }
+
+        await Click(A, 1_000 + timing.OpeningGameSettings.ExtraTimeCheckDLC, token).ConfigureAwait(false);
 
         // If they have DLC on the system and can't use it, requires pressing UP + A to start the game.
         // Should be harmless otherwise since they'll be in loading screen.
         await Click(DUP, 0_600, token).ConfigureAwait(false);
         await Click(A, 0_600, token).ConfigureAwait(false);
 
-        Log("¡Reiniciando el juego!");
+        Log("Restarting the game!");
 
         // Switch Logo lag, skip cutscene, game load screen
-        await Task.Delay(10_000 + timing.ExtraTimeLoadGame, token).ConfigureAwait(false);
+        await Task.Delay(10_000 + timing.OpeningGameSettings.ExtraTimeLoadGame, token).ConfigureAwait(false);
 
         for (int i = 0; i < 4; i++)
             await Click(A, 1_000, token).ConfigureAwait(false);
@@ -306,16 +321,16 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
 
             // We haven't made it back to overworld after a minute, so press A every 6 seconds hoping to restart the game.
             // Don't risk it if hub is set to avoid updates.
-            if (timer <= 0 && !timing.AvoidSystemUpdate)
+            if (timer <= 0 && !timing.MiscellaneousSettings.AvoidSystemUpdate)
             {
-                Log("¡Aún no estás en el juego, iniciando protocolo de rescate!");
+                Log("Still not in the game, initiating rescue protocol!");
                 while (!await IsOnOverworldTitle(token).ConfigureAwait(false) && !await IsInBattle(token).ConfigureAwait(false))
                     await Click(A, 6_000, token).ConfigureAwait(false);
                 break;
             }
         }
 
-        Log("¡De vuelta al supramundo!");
+        Log("Back in the overworld!");
     }
 
     public Task UnSoftBan(CancellationToken token)
@@ -323,7 +338,7 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
         // Like previous generations, the game uses a Unix timestamp for
         // how long we are soft banned and once the soft ban is lifted
         // the game sets the value back to 0 (1970/01/01 12:00 AM (UTC))
-        Log("Soft ban detectado, desbaneando");
+        Log("Soft ban detected, unbanning.");
         var data = BitConverter.GetBytes(0);
         return Connection.WriteBytesAsync(data, SoftBanUnixTimespanOffset, token);
     }
@@ -333,7 +348,7 @@ public abstract class PokeRoutineExecutor8SWSH(PokeBotState Config) : PokeRoutin
         // Default implementation to just press directional arrows. Can do via Hid keys, but users are slower than bots at even the default code entry.
         foreach (var key in TradeUtil.GetPresses(code))
         {
-            int delay = config.Timings.KeypressTime;
+            int delay = config.Timings.MiscellaneousSettings.KeypressTime;
             await Click(key, delay, token).ConfigureAwait(false);
         }
 

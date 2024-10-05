@@ -59,12 +59,12 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         {
             await InitializeHardware(Hub.Config.Trade, token).ConfigureAwait(false);
 
-            Log("Identificando los datos del entrenador de la consola host.");
+            Log("Identifying trainer data of the host console.");
             var sav = await IdentifyTrainer(token).ConfigureAwait(false);
             RecentTrainerCache.SetRecentTrainer(sav);
 
             OnConnectionSuccess();
-            Log($"Iniciando el bucle principal {nameof(PokeTradeBotLGPE)}.");
+            Log($"Starting main {nameof(PokeTradeBotLGPE)} loop.");
             await InnerLoop(sav, token).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -73,7 +73,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             throw;
         }
 
-        Log($"Finalizando el bucle {nameof(PokeTradeBotLGPE)}.");
+        Log($"Ending {nameof(PokeTradeBotLGPE)} loop.");
         await HardStop().ConfigureAwait(false);
     }
 
@@ -91,14 +91,14 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         await Task.Delay(2_000, t).ConfigureAwait(false);
         if (!t.IsCancellationRequested)
         {
-            Log("Reiniciando el bucle principal.");
+            Log("Restarting the main loop.");
             await MainLoop(t).ConfigureAwait(false);
         }
     }
 
     public async Task ReOpenGame(PokeTradeHubConfig config, CancellationToken token)
     {
-        Log("Error detectado, reiniciando el juego!!");
+        Log("Error detected, restarting the game!!");
         await CloseGame(config, token).ConfigureAwait(false);
         await StartGame(config, token).ConfigureAwait(false);
     }
@@ -131,7 +131,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         while (!token.IsCancellationRequested && Config.NextRoutineType == PokeRoutineType.Idle)
         {
             if (waitCounter == 0)
-                Log("Ninguna tarea asignada. Esperando nueva asignación de tarea.");
+                Log("No task assigned. Waiting for new task assignment.");
             waitCounter++;
             if (waitCounter % 10 == 0 && Hub.Config.AntiIdle)
                 await Click(B, 1_000, token).ConfigureAwait(false);
@@ -156,7 +156,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
 
             detail.IsProcessing = true;
             string tradetype = $" ({detail.Type})";
-            Log($"Empezando el próximo intercambio de bots de {type}{tradetype} Obteniendo datos...");
+            Log($"Starting next {type}{tradetype} Bot Trade. Getting data...");
             Hub.Config.Stream.StartTrade(this, detail, Hub);
             Hub.Queues.StartTrade(this, detail);
 
@@ -170,7 +170,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         {
             // Updates the assets.
             Hub.Config.Stream.IdleAssets(this);
-            Log("Nada que comprobar, esperando nuevos usuarios...");
+            Log("Nothing to check, waiting for new users...");
         }
 
         const int interval = 10;
@@ -221,11 +221,11 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         {
             detail.IsRetry = true;
             Hub.Queues.Enqueue(type, detail, Math.Min(priority, PokeTradePriorities.Tier2));
-            detail.SendNotification(this, "<a:warning:1206483664939126795> Oops! Algo ocurrió. Intentemoslo una ves mas.");
+            detail.SendNotification(this, "Oops! Something happened. I'll requeue you for another attempt.");
         }
         else
         {
-            detail.SendNotification(this, $"<a:warning:1206483664939126795> Oops! Algo ocurrió. Cancelando el trade: **{result.GetDescription()}**.");
+            detail.SendNotification(this, $"Oops! Something happened. Canceling the trade: {result}.");
             detail.TradeCanceled(this, result);
         }
     }
@@ -243,7 +243,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             var tradeDetails = tradeCodeStorage1.GetTradeDetails(trainerID);
             if (tradeDetails != null && tradeDetails.TID != 0 && tradeDetails.SID != 0)
             {
-                Log($"Aplicar Auto OT al Pokémon usando Trainer OT: {tradeDetails.OT}, TID: {tradeDetails.TID}, SID: {tradeDetails.SID}");
+                Log($"Applying AutoOT to the Pokémon using Trainer OT: {tradeDetails.OT}, TID: {tradeDetails.TID}, SID: {tradeDetails.SID}");
                 var updatedToSend = await ApplyAutoOT(toSend, trainerID);
                 if (updatedToSend != null)
                 {
@@ -260,13 +260,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             return PokeTradeResult.RecoverStart;
         }
         await Click(X, 2000, token).ConfigureAwait(false);
-        Log("Abriendo menú...");
+        Log("Opening Menu...");
         while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) != menuscreen)
         {
             await Click(B, 2000, token);
             await Click(X, 2000, token);
         }
-        Log("Seleccionando Comunicar....");
+        Log("Selecting Communicate......");
         await SetStick(SwitchStick.RIGHT, 30000, 0, 0, token).ConfigureAwait(false);
         await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
         while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 2, token), 0) == menuscreen || BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) == waitingtotradescreen)
@@ -279,19 +279,19 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
                     await Click(B, 1000, token);
                 }
                 await Click(X, 2000, token).ConfigureAwait(false);
-                Log("Abriendo menú...");
+                Log("Opening Menu......");
                 while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) != menuscreen)
                 {
                     await Click(B, 2000, token);
                     await Click(X, 2000, token);
                 }
-                Log("Seleccionando Comunicar....");
+                Log("Selecting Communicate......");
                 await SetStick(SwitchStick.RIGHT, 30000, 0, 0, token).ConfigureAwait(false);
                 await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
             }
         }
         await Task.Delay(2000, token).ConfigureAwait(false);
-        Log("Seleccionando conexión lejana......");
+        Log("Selecting Faraway Connection......");
 
         await SetStick(SwitchStick.RIGHT, 0, -30000, 0, token).ConfigureAwait(false);
         await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
@@ -300,7 +300,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         await Click(A, 1000, token).ConfigureAwait(false);
         await EnterLinkCodeLG(poke, token);
         poke.TradeSearching(this);
-        Log($"Buscando usuario {poke.Trainer.TrainerName}");
+        Log($"Searching for user {poke.Trainer.TrainerName}");
         await Task.Delay(3000, token).ConfigureAwait(false);
         var btimeout = new Stopwatch();
         btimeout.Restart();
@@ -311,14 +311,14 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             if (btimeout.ElapsedMilliseconds >= 45_000)
             {
                 poke.TradeCanceled(this, PokeTradeResult.NoTrainerFound);
-                Log($"No se encontró {poke.Trainer.TrainerName}");
+                Log($"{poke.Trainer.TrainerName} not found");
 
                 await ExitTrade(false, token);
                 Hub.Config.Stream.EndEnterCode(this);
                 return PokeTradeResult.NoTrainerFound;
             }
         }
-        Log($"Encontrado {poke.Trainer.TrainerName}");
+        Log($"{poke.Trainer.TrainerName} Found");
         await Task.Delay(10000, token).ConfigureAwait(false);
         var tradepartnersav = new SAV7b();
         var tradepartnersav2 = new SAV7b();
@@ -335,13 +335,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             uint displayTID = BinaryPrimitives.ReadUInt32LittleEndian(tradepartnersav.Blocks.Status.Data[0..4]) % 1_000_000;
             string tid7 = displayTID.ToString("D6");
             string sid7 = displaySID.ToString("D4");
-            Log($"Entrenador comercial de enlace encontrado: {tradepartnersav.OT}, TID7: {tid7}, SID7: {sid7}, Juego: {tradepartnersav.Version}");
+            Log($"Found Link Trade Partner: {tradepartnersav.OT}, TID7: {tid7}, SID7: {sid7}, Game: {tradepartnersav.Version}");
 
             // Save the OT, TID7, and SID7 information in the TradeCodeStorage for tradepartnersav
             tradeCodeStorage.UpdateTradeDetails(poke.Trainer.ID, tradepartnersav.OT, int.Parse(tid7), int.Parse(sid7));
 
             // Send notification with trainer details
-            poke.SendNotification(this, $"Entrenador comercial de enlace encontrado: {tradepartnersav2.OT}, TID7: {tid7}, SID7: {sid7}");
+            poke.SendNotification(this, $"Found Partner - OT: {tradepartnersav.OT}, TID: {tid7}, SID: {sid7}");
         }
 
         if (tradepartnersav2.OT != sav.OT)
@@ -350,14 +350,15 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             uint displayTID = BinaryPrimitives.ReadUInt32LittleEndian(tradepartnersav2.Blocks.Status.Data[0..4]) % 1_000_000;
             string tid7 = displayTID.ToString("D6");
             string sid7 = displaySID.ToString("D4");
-            Log($"Entrenador comercial de enlace encontrado: {tradepartnersav2.OT}, TID7: {tid7}, SID7: {sid7}");
+            Log($"Found Link Trade Partner: {tradepartnersav2.OT}, TID7: {tid7}, SID7: {sid7}");
 
             // Save the OT, TID7, and SID7 information in the TradeCodeStorage for tradepartnersav2
             tradeCodeStorage.UpdateTradeDetails(poke.Trainer.ID, tradepartnersav2.OT, int.Parse(tid7), int.Parse(sid7));
 
             // Send notification with trainer details
-            poke.SendNotification(this, $"Entrenador comercial de enlace encontrado: {tradepartnersav2.OT}, TID7: {tid7}, SID7: {sid7}");
+            poke.SendNotification(this, $"Found Partner - OT: {tradepartnersav2.OT}, TID: {tid7}, SID: {sid7}");
         }
+
 
         if (poke.Type == PokeTradeType.Dump)
         {
@@ -375,15 +376,15 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         {
             await Click(A, 1000, token);
         }
-        poke.SendNotification(this, "Tienes **15 segundos** para seleccionar tu Pokémon comercial");
-        Log("Esperando en la pantalla de comercio...");
+        poke.SendNotification(this, "You have 15 seconds to select your trade pokemon");
+        Log("Waiting on Trade Screen...");
 
         await Task.Delay(5_000, token).ConfigureAwait(false);
         var tradeResult = await ConfirmAndStartTrading(poke, 0, token);
         if (tradeResult != PokeTradeResult.Success)
         {
             if (tradeResult == PokeTradeResult.TrainerLeft)
-                Log("Intercambio cancelado porque el entrenador abandonó el intercambio.");
+                Log("Trade canceled because trainer left the trade.");
             await ExitTrade(false, token).ConfigureAwait(false);
             return tradeResult;
         }
@@ -400,13 +401,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         // Pokémon in b1s1 is same as the one they were supposed to receive (was never sent).
         if (SearchUtil.HashByDetails(received) == SearchUtil.HashByDetails(toSend) && received.Checksum == toSend.Checksum)
         {
-            Log("El usuario no completó el intercambio.");
+            Log("User did not complete the trade.");
             await ExitTrade(false, token).ConfigureAwait(false);
             return PokeTradeResult.TrainerTooSlow;
         }
 
         // As long as we got rid of our inject in b1s1, assume the trade went through.
-        Log("El usuario completó el intercambio.");
+        Log("User completed the trade.");
         poke.TradeFinished(this, received);
 
         // Still need to wait out the trade animation.
@@ -420,7 +421,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
     {
         // We'll keep watching B1S1 for a change to indicate a trade started -> should try quitting at that point.
         var oldEC = await Connection.ReadBytesAsync((uint)GetSlotOffset(0, slot), 8, token).ConfigureAwait(false);
-        Log("Confirmando e iniciando comercio...");
+        Log("Confirming and initiating trade...");
         await Click(A, 3_000, token).ConfigureAwait(false);
         for (int i = 0; i < 10; i++)
         {
@@ -430,13 +431,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         }
 
         var tradeCounter = 0;
-        Log("Comprobando los Pokémon recibidos en la ranura 1.");
+        Log("Checking for received pokemon in slot 1");
         while (true)
         {
             var newEC = await Connection.ReadBytesAsync((uint)GetSlotOffset(0, slot), 8, token).ConfigureAwait(false);
             if (!newEC.SequenceEqual(oldEC))
             {
-                Log("Cambio detectado en la ranura 1");
+                Log("Change detected in slot 1");
                 await Task.Delay(15_000, token).ConfigureAwait(false);
                 return PokeTradeResult.Success;
             }
@@ -446,7 +447,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             if (tradeCounter >= Hub.Config.Trade.TradeConfiguration.TradeAnimationMaxDelaySeconds)
             {
                 // If we don't detect a B1S1 change, the trade didn't go through in that time.
-                Log("No detectó un cambio en la ranura 1.");
+                Log("Did not detect a change in slot 1.");
                 await Click(B, 1_000, token).ConfigureAwait(false);
                 return PokeTradeResult.TrainerTooSlow;
             }
@@ -459,13 +460,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
 
     private async Task<PokeTradeResult> ProcessCloneTradeAsync(PokeTradeDetail<PB7> detail, SAV7b sav, CancellationToken token)
     {
-        detail.SendNotification(this, "__Resalta los pokemon__ de tu caja que quieras clonar, ¡hasta 6 a la vez! __Tienes 5 segundos__ entre resaltado y resaltado para pasar al siguiente pokemon (**¡Los 5 primeros empiezan ahora!**). Si quieres menos de 6, quédate en el mismo pokemon hasta que empiece el intercambio..");
+        detail.SendNotification(this, "Highlight the Pokemon in your box You would like Cloned up to 6 at a time! You have 5 seconds between highlights to move to the next pokemon.(The first 5 starts now!). If you would like to less than 6 remain on the same pokemon until the trade begins.");
         await Task.Delay(10_000);
         var offereddatac = await SwitchConnection.ReadBytesAsync(OfferedPokemon, 0x104, token);
         var offeredpbmc = new PB7(offereddatac);
         List<PB7> clonelist = new();
         clonelist.Add(offeredpbmc);
-        detail.SendNotification(this, $"<a:yes:1206485105674166292> Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
+        detail.SendNotification(this, $"You added {(Species)offeredpbmc.Species} to the clone list");
 
         for (int i = 0; i < 6; i++)
         {
@@ -480,7 +481,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             {
                 clonelist.Add(newofferedpbm);
                 offeredpbmc = newofferedpbm;
-                detail.SendNotification(this, $"<a:yes:1206485105674166292> Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
+                detail.SendNotification(this, $"You added {(Species)offeredpbmc.Species} to the clone list");
             }
         }
 
@@ -489,7 +490,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             clonestring.AppendLine($"{(Species)k.Species}");
         detail.SendNotification(this, clonestring.ToString());
 
-        detail.SendNotification(this, "Saliendo del trade para inyectar clones, por favor reconéctese usando el mismo código de enlace.");
+        detail.SendNotification(this, "Exiting Trade to inject clones, please reconnect using the same link code.");
         await ExitTrade(false, token);
         foreach (var g in clonelist)
         {
@@ -497,13 +498,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             await Task.Delay(1000);
         }
         await Click(X, 2000, token).ConfigureAwait(false);
-        Log("Abriendo menú...");
+        Log("Opening Menu...");
         while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) != menuscreen)
         {
             await Click(B, 2000, token);
             await Click(X, 2000, token);
         }
-        Log("Seleccionando Comunicar...");
+        Log("Selecting Communicate...");
         await SetStick(SwitchStick.RIGHT, 30000, 0, 0, token).ConfigureAwait(false);
         await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
         while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 2, token), 0) == menuscreen || BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) == waitingtotradescreen)
@@ -516,19 +517,19 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
                     await Click(B, 1000, token);
                 }
                 await Click(X, 2000, token).ConfigureAwait(false);
-                Log("Abriendo menú...");
+                Log("Opening Menu...");
                 while (BitConverter.ToUInt16(await SwitchConnection.ReadBytesMainAsync(ScreenOff, 4, token), 0) != menuscreen)
                 {
                     await Click(B, 2000, token);
                     await Click(X, 2000, token);
                 }
-                Log("Seleccionando Comunicar...");
+                Log("Selecting Communicate...");
                 await SetStick(SwitchStick.RIGHT, 30000, 0, 0, token).ConfigureAwait(false);
                 await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
             }
         }
         await Task.Delay(2000);
-        Log("Seleccionando Conexión Lejana...");
+        Log("Selecting Faraway Connection...");
 
         await SetStick(SwitchStick.RIGHT, 0, -30000, 0, token).ConfigureAwait(false);
         await SetStick(SwitchStick.RIGHT, 0, 0, 0, token).ConfigureAwait(false);
@@ -537,7 +538,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         await Click(A, 1000, token).ConfigureAwait(false);
         await EnterLinkCodeLG(detail, token);
         detail.TradeSearching(this);
-        Log($"Buscando usuario {detail.Trainer.TrainerName}");
+        Log($"Searching for user {detail.Trainer.TrainerName}");
         var btimeout = new Stopwatch();
         while (await LGIsinwaitingScreen(token))
         {
@@ -545,14 +546,14 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             if (btimeout.ElapsedMilliseconds >= 45_000)
             {
                 detail.TradeCanceled(this, PokeTradeResult.NoTrainerFound);
-                Log($"No se encontró a {detail.Trainer.TrainerName}");
+                Log($"{detail.Trainer.TrainerName} not found");
 
                 await ExitTrade(false, token);
                 Hub.Config.Stream.EndEnterCode(this);
                 return PokeTradeResult.NoTrainerFound;
             }
         }
-        Log($"Encontrado {detail.Trainer.TrainerName}");
+        Log($"{detail.Trainer.TrainerName} Found");
         await Task.Delay(10000);
         var tradepartnersav = new SAV7b();
         var tradepartnersav2 = new SAV7b();
@@ -562,13 +563,13 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         tpsarray2.CopyTo(tradepartnersav2.Blocks.Status.Data);
         if (tradepartnersav.OT != sav.OT)
         {
-            Log($"Entrenador comercial de enlace encontrado: {tradepartnersav.OT}, TID: {tradepartnersav.DisplayTID}, SID: {tradepartnersav.DisplaySID},Juego: {tradepartnersav.Version}");
-            detail.SendNotification(this, $"Entrenador encontrado: **{tradepartnersav.OT}**.\n\n▼\n Aqui esta tu Informacion\n **TID**: __{tradepartnersav.DisplayTID}__\n **SID**: __{tradepartnersav.DisplaySID}__\n **Juego**: __{tradepartnersav.Version}__\n▲");
+            Log($"Found Link Trade Parter: {tradepartnersav.OT}, TID: {tradepartnersav.DisplayTID}, SID: {tradepartnersav.DisplaySID},Game: {tradepartnersav.Version}");
+            detail.SendNotification(this, $"Found Link Trade Parter: {tradepartnersav.OT}, TID: {tradepartnersav.DisplayTID}, SID: {tradepartnersav.DisplaySID}, Game: {tradepartnersav.Version}");
         }
         if (tradepartnersav2.OT != sav.OT)
         {
-            Log($"Entrenador comercial de enlace encontrado: {tradepartnersav2.OT}, TID: {tradepartnersav2.DisplayTID}, SID: {tradepartnersav2.DisplaySID}");
-            detail.SendNotification(this, $"Entrenador encontrado: **{tradepartnersav2.OT}**.\n\n▼\n Aqui esta tu Informacion\n **TID**: __{tradepartnersav2.DisplayTID}__\n **SID**: __{tradepartnersav2.DisplaySID}__\n **Juego**: __{tradepartnersav.Version}__\n▲");
+            Log($"Found Link Trade Parter: {tradepartnersav2.OT}, TID: {tradepartnersav2.DisplayTID}, SID: {tradepartnersav2.DisplaySID}");
+            detail.SendNotification(this, $"Found Link Trade Parter: {tradepartnersav2.OT}, TID: {tradepartnersav2.DisplayTID}, SID: {tradepartnersav2.DisplaySID}, Game: {tradepartnersav.Version}");
         }
         foreach (var t in clonelist)
         {
@@ -581,17 +582,17 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             {
                 await Click(A, 1000, token);
             }
-            detail.SendNotification(this, $"Enviando {(Species)t.Species}. Tienes 15 segundos para seleccionar tu pokemon de intercambio");
-            Log("Esperando en la pantalla comercial...");
+            detail.SendNotification(this, $"Sending {(Species)t.Species}. You have 15 seconds to select your trade pokemon");
+            Log("Waiting on trade screen...");
 
             await Task.Delay(10_000).ConfigureAwait(false);
-            detail.SendNotification(this, "<a:warning:1206483664939126795> Te quedan 5 segundos para llegar a la pantalla de operaciones y no interrumpir la operación.");
+            detail.SendNotification(this, "You have 5 seconds left to get to the trade screen to not break the trade");
             await Task.Delay(5_000);
             var tradeResult = await ConfirmAndStartTrading(detail, clonelist.IndexOf(t), token);
             if (tradeResult != PokeTradeResult.Success)
             {
                 if (tradeResult == PokeTradeResult.TrainerLeft)
-                    Log("Intercambio cancelado porque el entrenador abandonó el intercambio.");
+                    Log("Trade canceled because trainer left the trade.");
                 await ExitTrade(false, token).ConfigureAwait(false);
                 return tradeResult;
             }
@@ -609,11 +610,11 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
 
     private async Task<PokeTradeResult> ProcessDumpTradeAsync(PokeTradeDetail<PB7> detail, CancellationToken token)
     {
-        detail.SendNotification(this, "Resalta el Pokémon en tu caja, tienes 30 segundos");
+        detail.SendNotification(this, "Highlight the Pokemon in your box, you have 30 seconds");
         var offereddata = await SwitchConnection.ReadBytesAsync(OfferedPokemon, 0x104, token);
         var offeredpbm = new PB7(offereddata);
 
-        detail.SendNotification(this, offeredpbm, "▼ Aquí está el pokemon que me mostraste ▼");
+        detail.SendNotification(this, offeredpbm, "Here is the pokemon you showed me.");
 
         var quicktime = new Stopwatch();
         quicktime.Restart();
@@ -623,12 +624,12 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             var newofferedpbm = new PB7(newoffereddata);
             if (SearchUtil.HashByDetails(offeredpbm) != SearchUtil.HashByDetails(newofferedpbm))
             {
-                detail.SendNotification(this, newofferedpbm, "▼ Aquí está el pokemon que me mostraste ▼");
+                detail.SendNotification(this, newofferedpbm, "Here is the pokemon you showed me.");
 
                 offeredpbm = newofferedpbm;
             }
         }
-        detail.SendNotification(this, "¡El tiempo ha terminado!");
+        detail.SendNotification(this, "Time is up!");
         return PokeTradeResult.Success;
     }
 
@@ -700,19 +701,19 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         if (shouldWait)
         {
             Hub.BotSync.Barrier.AddParticipant();
-            Log($"Se unió a la barrera. Conteo: {Hub.BotSync.Barrier.ParticipantCount}");
+            Log($"Joined the Barrier. Count: {Hub.BotSync.Barrier.ParticipantCount}");
         }
         else
         {
             Hub.BotSync.Barrier.RemoveParticipant();
-            Log($"Dejó la barrera. Conteo: {Hub.BotSync.Barrier.ParticipantCount}");
+            Log($"Left the Barrier. Count: {Hub.BotSync.Barrier.ParticipantCount}");
         }
     }
 
     private async Task ExitTrade(bool unexpected, CancellationToken token)
     {
         if (unexpected)
-            Log("Comportamiento inesperado, recuperando posición.");
+            Log("Unexpected behavior, recovering position.");
         int ctr = 120_000;
         while (!await IsOnOverworldStandard(token))
         {
@@ -723,30 +724,29 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             }
 
             // Press B to bring up the exit screen
-            Log("Saliendo del comercio...");
+            Log("Exiting the trade...");
             await Click(B, 1_000, token).ConfigureAwait(false);
             if (await IsOnOverworldStandard(token))
                 return;
 
             // Press A to confirm the exit
-            Log("Presionando A para salir...");
+            Log("Pressing A to exit...");
             await Click(A, 1_000, token).ConfigureAwait(false);
 
             // Wait 10 seconds
             await Task.Delay(10_000, token);
 
             // Press B three more times to navigate back to the overworld
-            Log("Presionando B para retroceder completamente.");
-
+            Log("Pressing B to back all the way out.");
             await Click(B, 1_000, token).ConfigureAwait(false);
             await Click(B, 1_000, token).ConfigureAwait(false);
             await Click(B, 1_000, token).ConfigureAwait(false);
 
             // Check if we are on the overworld
-            Log("Comprobando si estamos en el pverworld.");
+            Log("Checking if we are on overworld.");
             if (await IsOnOverworldStandard(token))
             {
-                Log("Con éxito en el overworld.");
+                Log("Successfully on overworld.");
                 return;
             }
 
@@ -770,6 +770,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             ClearOTTrash(cln, tradeDetails);
             if (!toSend.IsNicknamed)
                 cln.ClearNickname();
+
             if (toSend.IsShiny)
                 cln.PID = (uint)((cln.TID16 ^ cln.SID16 ^ (cln.PID & 0xFFFF) ^ toSend.ShinyXor) << 16) | (cln.PID & 0xFFFF);
 
@@ -778,19 +779,19 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             var tradelgpe = new LegalityAnalysis(cln);
             if (tradelgpe.Valid)
             {
-                Log("El Pokémon es válido, aplicando Auto OT.");
+                Log("Pokemon is valid, applying AutoOT.");
                 return Task.FromResult<PB7?>(cln);
             }
             else
             {
-                Log("El Pokémon no válido, no aplica Auto OT.");
+                Log("Pokemon not valid, not applying AutoOT.");
                 Log(tradelgpe.Report());
                 return Task.FromResult<PB7?>(null);
             }
         }
         else
         {
-            Log("No se encontraron detalles comerciales para el OT del entrenador en cuestión.");
+            Log("Trade details not found for the given trainer OT.");
             return Task.FromResult<PB7?>(null);
         }
     }
@@ -799,7 +800,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
     {
         if (tradeDetails?.OT == null)
         {
-            LogUtil.LogInfo("AutoOT", "Los detalles comerciales o OT son nulos. Omitir ClearOTTrash.");
+            LogUtil.LogInfo("AutoOT", "Trade details or OT is null. Skipping ClearOTTrash.");
             return;
         }
 

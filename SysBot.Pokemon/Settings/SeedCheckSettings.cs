@@ -6,13 +6,13 @@ public class SeedCheckSettings
 {
     private const string FeatureToggle = nameof(FeatureToggle);
 
-    [Category(FeatureToggle), Description("Permite devolver solo el cuadro brillante más cercano, los primeros cuadros brillantes de estrella y cuadrados, o los primeros tres cuadros brillantes.")]
+    [Category(FeatureToggle), Description("Allows returning only the closest shiny frame, the first star and square shiny frames, or the first three shiny frames.")]
     public SeedCheckResults ResultDisplayMode { get; set; }
 
-    [Category(FeatureToggle), Description("Cuando está habilitada, las comprobaciones de semillas devolverán todos los resultados posibles en lugar de la primera coincidencia válida.")]
+    [Category(FeatureToggle), Description("When enabled, seed checks will return all possible seed results instead of the first valid match.")]
     public bool ShowAllZ3Results { get; set; }
 
-    public override string ToString() => "Configuración de verificación de semillas";
+    public override string ToString() => "Seed Check Settings";
 }
 
 public enum SeedCheckResults

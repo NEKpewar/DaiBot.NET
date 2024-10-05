@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using static PKHeX.Core.LearnMethod;
 using System.Threading.Tasks;
-using static MovesTranslationDictionary;
 
 namespace SysBot.Pokemon.Helpers.ShowdownHelpers
 {
@@ -25,15 +24,13 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                 var correctedMoveName = await GetClosestMoveAsync(moveName, validMoves);
                 if (!string.IsNullOrEmpty(correctedMoveName))
                 {
-                    string translatedCorrectedMoveName = MovesTranslation.ContainsKey(correctedMoveName) ? MovesTranslation[correctedMoveName] : correctedMoveName;
-                    string translatedMoveName = MovesTranslation.ContainsKey(moveName) ? MovesTranslation[moveName] : moveName;
                     if (!usedMoves.Contains(correctedMoveName))
                     {
                         correctedMoveLines.Add($"- {correctedMoveName}");
                         usedMoves.Add(correctedMoveName);
                         if (moveName != correctedMoveName)
                         {
-                            correctionMessages.Add($"- {speciesName} no puede aprender {translatedMoveName}. Reemplazado por **{translatedCorrectedMoveName}**.");
+                            correctionMessages.Add($"{speciesName} cannot learn {moveName}. Replaced with **{correctedMoveName}**.");
                         }
                     }
                     else
@@ -42,10 +39,9 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                         if (unusedValidMoves.Count > 0)
                         {
                             var randomMove = unusedValidMoves[new Random().Next(unusedValidMoves.Count)];
-                            string translatedRandomMove = MovesTranslation.ContainsKey(randomMove) ? MovesTranslation[randomMove] : randomMove;
                             correctedMoveLines.Add($"- {randomMove}");
                             usedMoves.Add(randomMove);
-                            correctionMessages.Add($"- {speciesName} no puede aprender {translatedMoveName}. Reemplazado por **{translatedRandomMove}**.");
+                            correctionMessages.Add($"{speciesName} cannot learn {moveName}. Replaced with **{randomMove}**.");
                         }
                     }
                 }
@@ -57,7 +53,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
                 if (i < correctedMoveLines.Count)
                 {
                     lines[Array.IndexOf(lines, moveLine)] = correctedMoveLines[i];
-                    LogUtil.LogInfo("ShowdownSet", $"Movimiento corregido: {correctedMoveLines[i]}");
+                    LogUtil.LogInfo("ShowdownSet", $"Corrected move: {correctedMoveLines[i]}");
                 }
                 else
                 {

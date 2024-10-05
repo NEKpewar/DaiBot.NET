@@ -19,9 +19,9 @@ public class SeedSearchResult(Z3SearchResult Type, ulong Seed, int FlawlessIVCou
     {
         return Type switch
         {
-            Z3SearchResult.SeedMismatch => $"Semilla encontrada, pero no una coincidencia exacta {Seed:X16}",
+            Z3SearchResult.SeedMismatch => $"Seed found, but not an exact match {Seed:X16}",
             Z3SearchResult.Success => string.Join(Environment.NewLine, GetLines()),
-            _ => "¡El Pokémon no es un Pokémon de incursión!",
+            _ => "The Pokémon is not a raid Pokémon!",
         };
     }
 
@@ -29,7 +29,7 @@ public class SeedSearchResult(Z3SearchResult Type, ulong Seed, int FlawlessIVCou
     {
         if (FlawlessIVCount >= 1)
             yield return $"IVCount: {FlawlessIVCount}";
-        yield return "Los spreads se enumeran por un recuento de IV impecable.";
+        yield return "Spreads are listed by flawless IV count.";
 
         SeedSearchUtil.GetShinyFrames(Seed, out int[] frames, out uint[] type, out List<uint[,]> IVs, Mode);
 

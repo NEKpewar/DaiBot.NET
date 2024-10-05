@@ -9,13 +9,13 @@ public class FolderSettings : IDumper
 
     private const string Files = nameof(Files);
 
-    [Category(Files), Description("Carpeta de origen: desde donde se seleccionan los archivos PKM a distribuir."), DisplayName("Carpeta de Distribución")]
+    [Category(Files), Description("Source folder: where PKM files to distribute are selected from.")]
     public string DistributeFolder { get; set; } = string.Empty;
 
-    [Category(FeatureToggle), Description("Cuando está habilitado, vuelca todos los archivos PKM recibidos (resultados comerciales) en la carpeta de volcado."), DisplayName("Habilitar el Volcado de Archivos (Dump)")]
+    [Category(FeatureToggle), Description("When enabled, dumps any received PKM files (trade results) to the DumpFolder.")]
     public bool Dump { get; set; }
 
-    [Category(Files), Description("Carpeta de destino: donde se descargan todos los archivos PKM recibidos."), DisplayName("Carpeta de Volcado (Dump)")]
+    [Category(Files), Description("Destination folder: where all received PKM files are dumped to.")]
     public string DumpFolder { get; set; } = string.Empty;
 
     public void CreateDefaults(string path)
@@ -30,5 +30,5 @@ public class FolderSettings : IDumper
         DistributeFolder = distribute;
     }
 
-    public override string ToString() => "Configuración de carpeta/dump";
+    public override string ToString() => "Folder / Dumping Settings";
 }

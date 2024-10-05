@@ -22,7 +22,7 @@ public sealed class EncounterBotLineSWSH(PokeBotState Config, PokeTradeHub<PK8> 
             if (attempts < 0) // aborted
                 continue;
 
-            Log($"¡Encuentro encontrado después de {attempts} intentos! Comprobando detalles...");
+            Log($"Encounter found after {attempts} attempts! Checking details...");
 
             // Reset stick while we wait for the encounter to load.
             await ResetStick(token).ConfigureAwait(false);
@@ -30,7 +30,7 @@ public sealed class EncounterBotLineSWSH(PokeBotState Config, PokeTradeHub<PK8> 
             var pk = await ReadUntilPresent(WildPokemonOffset, 2_000, 0_200, BoxFormatSlotSize, token).ConfigureAwait(false);
             if (pk == null)
             {
-                Log("Se detectaron datos no válidos. Reiniciando bucle.");
+                Log("Invalid data detected. Restarting loop.");
 
                 // Flee and continue looping.
                 await FleeToOverworld(token).ConfigureAwait(false);
@@ -44,14 +44,14 @@ public sealed class EncounterBotLineSWSH(PokeBotState Config, PokeTradeHub<PK8> 
             if (await HandleEncounter(pk, token).ConfigureAwait(false))
                 return;
 
-            Log("Huyendo...");
+            Log("Running away...");
             await FleeToOverworld(token).ConfigureAwait(false);
         }
     }
 
     private async Task<int> StepUntilEncounter(CancellationToken token)
     {
-        Log("Caminando hasta encontrar un encuentro...");
+        Log("Walking around until an encounter...");
         int attempts = 0;
         while (!token.IsCancellationRequested)
         {
@@ -86,7 +86,7 @@ public sealed class EncounterBotLineSWSH(PokeBotState Config, PokeTradeHub<PK8> 
 
                 attempts++;
                 if (attempts % 10 == 0)
-                    Log($"Intenté {attempts} veces, todavía no hay encuentros.");
+                    Log($"Tried {attempts} times, still no encounters.");
             }
 
             if (await IsInBattle(token).ConfigureAwait(false))

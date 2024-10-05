@@ -11,7 +11,7 @@ namespace SysBot.Pokemon.Helpers.ShowdownHelpers
             var enc = la.EncounterMatch;
             if (!enc.Shiny.IsValid(pk))
             {
-                correctionMessages.Add($"- Este encuentro de {speciesName} no puede ser shiny. Cambiandolo a **Shiny: No**.");
+                correctionMessages.Add($"This encounter of {speciesName} cannot be shiny. Setting to **Shiny: No**.");
                 for (int i = 0; i < lines.Length; i++)
                 {
                     if (lines[i].Contains("Shiny: Yes", StringComparison.OrdinalIgnoreCase))

@@ -6,9 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SysBot.Pokemon.Helpers.ShowdownHelpers;
-using static AbilityTranslationDictionary;
-using static NatureTranslations;
-using static MovesTranslationDictionary;
 
 namespace SysBot.Pokemon;
 
@@ -65,15 +62,15 @@ public static class AutoCorrectShowdown<T> where T : PKM, new()
                 // Add separate messages for species and form corrections
                 if (correctedSpeciesName != originalSpeciesName)
                 {
-                    correctionMessages.Add($"- La especie era incorrecta. Ajustado desde **{originalSpeciesName}** a **{correctedSpeciesName}**.");
+                    correctionMessages.Add($"Species was incorrect. Adjusted from **{originalSpeciesName}** to **{correctedSpeciesName}**.");
                 }
                 if (correctedFormName != originalFormName)
                 {
-                    correctionMessages.Add($"- La forma era incorrecta. Ajustado desde **{originalFormName}** a **{correctedFormName}**.");
+                    correctionMessages.Add($"Form was incorrect. Adjusted from **{originalFormName}** to **{correctedFormName}**.");
                 }
                 if (correctedSpeciesName == originalSpeciesName && correctedFormName == originalFormName)
                 {
-                    correctionMessages.Add($"- La especie o la forma eran incorrectas. Ajustado a **{finalCorrectedName}**.");
+                    correctionMessages.Add($"Species or form was incorrect. Adjusted to **{finalCorrectedName}**.");
                 }
             }
 
@@ -88,9 +85,7 @@ public static class AutoCorrectShowdown<T> where T : PKM, new()
 
                 if (!string.IsNullOrEmpty(correctedAbilityName) && correctedAbilityName != abilityName)
                 {
-                    string translatedAbilityName = AbilityTranslation.ContainsKey(correctedAbilityName) ? AbilityTranslation[correctedAbilityName] : correctedAbilityName;
-                    string translatedAbilityOriginal = AbilityTranslation.ContainsKey(abilityName) ? AbilityTranslation[abilityName] : abilityName;
-                    correctionMessages.Add($"- {speciesName} no puede tener la habilidad {translatedAbilityOriginal}. Se ha ajustado a **{translatedAbilityName}**.");
+                    correctionMessages.Add($"{speciesName} can't have the ability {abilityName}. Adjusted to **{correctedAbilityName}**.");
                 }
             }
 
@@ -102,27 +97,20 @@ public static class AutoCorrectShowdown<T> where T : PKM, new()
 
                 if (!string.IsNullOrEmpty(correctedNatureName) && correctedNatureName != natureName)
                 {
-                    string translatedNatureName = TraduccionesNaturalezas.ContainsKey(correctedNatureName) ? TraduccionesNaturalezas[correctedNatureName] : correctedNatureName;
-                    correctionMessages.Add($"- La naturaleza estaba incorrecto. Se ha ajustado a naturaleza **{translatedNatureName}**.");
+                    correctionMessages.Add($"Nature was incorrect. Adjusted to **{correctedNatureName}** Nature.");
                 }
             }
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             string formNameForBallVerification = correctedSpeciesName == speciesName ? formName : correctedFormName;
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             string correctedBallName = string.Empty;
             if (!string.IsNullOrEmpty(ballName) && autoCorrectConfig.AutoCorrectBall)
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8604 // Possible null reference argument.
                 var legalBall = await BallHelper<T>.GetLegalBall(speciesIndex, formNameForBallVerification, ballName, gameStrings, pk);
-#pragma warning restore CS8604 // Possible null reference argument.
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 correctedBallName = legalBall;
 
                 if (!string.IsNullOrEmpty(correctedBallName) && correctedBallName != ballName)
                 {
-                    correctionMessages.Add($"- {speciesName} no puede estar en la ball: {ballName}. Se ha ajustado a: **{correctedBallName}**.");
+                    correctionMessages.Add($"{speciesName} can't be in a {ballName}. Adjusted to **{correctedBallName}**.");
                 }
             }
 

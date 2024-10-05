@@ -25,7 +25,7 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
     public async Task CleanExit(CancellationToken token)
     {
         await SetScreen(ScreenState.On, token).ConfigureAwait(false);
-        Log("Desconectando los controladores al salir de rutina");
+        Log("Detaching controllers on routine exit.");
         await DetachController(token).ConfigureAwait(false);
     }
 
@@ -41,10 +41,10 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
 
         // Close out of the game
         await Click(B, 0_500, token).ConfigureAwait(false);
-        await Click(HOME, 2_000 + timing.ExtraTimeReturnHome, token).ConfigureAwait(false);
+        await Click(HOME, 2_000 + timing.ClosingGameSettings.ExtraTimeReturnHome, token).ConfigureAwait(false);
         await Click(X, 1_000, token).ConfigureAwait(false);
-        await Click(A, 5_000 + timing.ExtraTimeCloseGame, token).ConfigureAwait(false);
-        Log("Cerre el juego!");
+        await Click(A, 5_000 + timing.ClosingGameSettings.ExtraTimeCloseGame, token).ConfigureAwait(false);
+        Log("Closed out of the game!");
     }
 
     public async Task<byte> GetCurrentBox(CancellationToken token)
@@ -94,12 +94,12 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
         // Check title so we can warn if mode is incorrect.
         string title = await SwitchConnection.GetTitleID(token).ConfigureAwait(false);
         if (title is not (ScarletID or VioletID))
-            throw new Exception($"{title} no es un título SV válido. ¿Tu modo es correcto?");
+            throw new Exception($"{title} is not a valid SV title. Is your mode correct?");
 
         // Verify the game version.
         var game_version = await SwitchConnection.GetGameInfo("version", token).ConfigureAwait(false);
         if (!game_version.SequenceEqual(SVGameVersion))
-            throw new Exception($"La versión del juego no es compatible. Versión esperada {SVGameVersion} y la versión actual del juego es {game_version}.");
+            throw new Exception($"Game version is not supported. Expected version {SVGameVersion}, and current game version is {game_version}.");
 
         var sav = await GetFakeTrainerSAV(token).ConfigureAwait(false);
         InitSaveData(sav);
@@ -107,26 +107,26 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
         if (!IsValidTrainerData())
         {
             await CheckForRAMShiftingApps(token).ConfigureAwait(false);
-            throw new Exception("Consulte la wiki de SysBot.NET (https://github.com/kwsch/SysBot.NET/wiki/Troubleshooting) para obtener más información.");
+            throw new Exception("Refer to the SysBot.NET wiki (https://github.com/kwsch/SysBot.NET/wiki/Troubleshooting) for more information.");
         }
 
         if (await GetTextSpeed(token).ConfigureAwait(false) < TextSpeedOption.Fast)
-            throw new Exception("La velocidad del texto debe configurarse en RÁPIDO. Solucione esto para un funcionamiento correcto.");
+            throw new Exception("Text speed should be set to FAST. Fix this for correct operation.");
 
         return sav;
     }
 
     public async Task InitializeHardware(IBotStateSettings settings, CancellationToken token)
     {
-        Log("Separación al iniciar.");
+        Log("Detaching on startup.");
         await DetachController(token).ConfigureAwait(false);
         if (settings.ScreenOff)
         {
-            Log("Apagando la pantalla.");
+            Log("Turning off screen.");
             await SetScreen(ScreenState.Off, token).ConfigureAwait(false);
         }
 
-        Log("Configuración de esperas ocultas específicas de SV");
+        Log("Setting SV-specific hid waits");
         await Connection.SendAsync(SwitchCommand.Configure(SwitchConfigureParameter.keySleepTime, KeyboardPressTime), token).ConfigureAwait(false);
         await Connection.SendAsync(SwitchCommand.Configure(SwitchConfigureParameter.pollRate, HidWaitTime), token).ConfigureAwait(false);
     }
@@ -188,7 +188,7 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
 
     public async Task ReOpenGame(PokeTradeHubConfig config, CancellationToken token)
     {
-        Log("Error detectado, reiniciando el juego!!");
+        Log("Error detected, restarting the game!!");
         await CloseGame(config, token).ConfigureAwait(false);
         await StartGame(config, token).ConfigureAwait(false);
     }
@@ -213,30 +213,45 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
 
     public async Task StartGame(PokeTradeHubConfig config, CancellationToken token)
     {
-        var timing = config.Timings;
 
         // Open game.
-        await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+        var timing = config.Timings;
+        var loadPro = timing.OpeningGameSettings.ProfileSelectionRequired ? timing.OpeningGameSettings.ExtraTimeLoadProfile : 0;
+
+        await Click(A, 1_000 + loadPro, token).ConfigureAwait(false); // Initial "A" Press to start the Game + a delay if needed for profiles to load
 
         // Menus here can go in the order: Update Prompt -> Profile -> DLC check -> Unable to use DLC.
         //  The user can optionally turn on the setting if they know of a breaking system update incoming.
-        if (timing.AvoidSystemUpdate)
+        if (timing.MiscellaneousSettings.AvoidSystemUpdate)
         {
             await Click(DUP, 0_600, token).ConfigureAwait(false);
-            await Click(A, 1_000 + timing.ExtraTimeLoadProfile, token).ConfigureAwait(false);
+            await Click(A, 1_000 + timing.OpeningGameSettings.ExtraTimeLoadProfile, token).ConfigureAwait(false);
         }
 
-        await Click(A, 1_000 + timing.ExtraTimeCheckDLC, token).ConfigureAwait(false);
+        // Only send extra Presses if we need to
+        if (timing.OpeningGameSettings.ProfileSelectionRequired)
+        {
+            await Click(A, 1_000, token).ConfigureAwait(false); // Now we are on the Profile Screen
+            await Click(A, 1_000, token).ConfigureAwait(false); // Select the profile
+        }
+
+        // Digital game copies take longer to load
+        if (timing.OpeningGameSettings.CheckGameDelay)
+        {
+            await Task.Delay(2_000 + timing.OpeningGameSettings.ExtraTimeCheckGame, token).ConfigureAwait(false);
+        }
+
+        await Click(A, 1_000 + timing.OpeningGameSettings.ExtraTimeCheckDLC, token).ConfigureAwait(false);
 
         // If they have DLC on the system and can't use it, requires pressing UP + A to start the game.
         // Should be harmless otherwise since they'll be in loading screen.
         await Click(DUP, 0_600, token).ConfigureAwait(false);
         await Click(A, 0_600, token).ConfigureAwait(false);
 
-        Log("¡Reiniciando el juego!");
+        Log("Restarting the game!");
 
         // Switch Logo and game load screen
-        await Task.Delay(12_000 + timing.ExtraTimeLoadGame, token).ConfigureAwait(false);
+        await Task.Delay(12_000 + timing.OpeningGameSettings.ExtraTimeLoadGame, token).ConfigureAwait(false);
 
         for (int i = 0; i < 8; i++)
             await Click(A, 1_000, token).ConfigureAwait(false);
@@ -249,17 +264,17 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
 
             // We haven't made it back to overworld after a minute, so press A every 6 seconds hoping to restart the game.
             // Don't risk it if hub is set to avoid updates.
-            if (timer <= 0 && !timing.AvoidSystemUpdate)
+            if (timer <= 0 && !timing.MiscellaneousSettings.AvoidSystemUpdate)
             {
-                Log("¡Aún no estás en el juego, iniciando protocolo de rescate!");
+                Log("Still not in the game, initiating rescue protocol!");
                 while (!await IsOnOverworldTitle(token).ConfigureAwait(false))
                     await Click(A, 6_000, token).ConfigureAwait(false);
                 break;
             }
         }
 
-        await Task.Delay(5_000 + timing.ExtraTimeLoadOverworld, token).ConfigureAwait(false);
-        Log("¡De vuelta al supramundo!");
+        await Task.Delay(5_000 + timing.OpeningGameSettings.ExtraTimeLoadOverworld, token).ConfigureAwait(false);
+        Log("Back in the overworld!");
     }
 
     protected virtual async Task EnterLinkCode(int code, PokeTradeHubConfig config, CancellationToken token)
@@ -282,7 +297,7 @@ public abstract class PokeRoutineExecutor9SV : PokeRoutineExecutor<PK9>
             // Enter link code using directional arrows
             foreach (var key in TradeUtil.GetPresses(code))
             {
-                int delay = config.Timings.KeypressTime;
+                int delay = config.Timings.MiscellaneousSettings.KeypressTime;
                 await Click(key, delay, token).ConfigureAwait(false);
             }
         }

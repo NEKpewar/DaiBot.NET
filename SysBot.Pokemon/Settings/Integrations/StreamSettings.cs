@@ -27,104 +27,104 @@ public class StreamSettings
 
     public static Action<PKM, string>? CreateSpriteFile { get; set; }
 
-    [Category(Operation), Description("Formato para mostrar las Operaciones Completadas. {0} = Conteo")]
-    public string CompletedTradesFormat { get; set; } = "Operaciones completadas: {0}";
+    [Category(Operation), Description("Format to display the Completed Trades. {0} = Count")]
+    public string CompletedTradesFormat { get; set; } = "Completed Trades: {0}";
 
-    [Category(Operation), Description("Copia el archivo de bloqueo comercial si existe; de ​​lo contrario, se copia una imagen de marcador de posición.")]
+    [Category(Operation), Description("Copies the TradeBlockFile if it exists, otherwise, a placeholder image is copied instead.")]
     public bool CopyImageFile { get; set; } = true;
 
-    [Category(Operation), Description("Generar activos continuos; el apagado impedirá la generación de activos.")]
+    [Category(Operation), Description("Generate stream assets; turning off will prevent generation of assets.")]
     public bool CreateAssets { get; set; }
 
-    [Category(Operation), Description("Cree un archivo que indique el recuento de operaciones completadas cuando se inicia una nueva operación.")]
+    [Category(Operation), Description("Create a file indicating the count of completed trades when a new trade starts.")]
     public bool CreateCompletedTrades { get; set; } = true;
 
-    [Category(Operation), Description("Crear un archivo que enumere la cantidad estimada de tiempo que un usuario tendrá que esperar si se unió a la cola.")]
+    [Category(Operation), Description("Create a file listing the estimated amount of time a user will have to wait if they joined the queue.")]
     public bool CreateEstimatedTime { get; set; } = true;
 
-    [Category(Operation), Description("Genere una lista de las personas que se encuentran actualmente en cubierta.")]
+    [Category(Operation), Description("Generate a list of People currently on-deck.")]
     public bool CreateOnDeck { get; set; } = true;
 
-    [Category(Operation), Description("Generar una lista de personas actualmente en cubierta #2.")]
+    [Category(Operation), Description("Generate a list of People currently on-deck #2.")]
     public bool CreateOnDeck2 { get; set; } = true;
 
-    [Category(Operation), Description("Genere detalles de inicio de operaciones, indicando con quién está operando el robot.")]
+    [Category(Operation), Description("Generate trade start details, indicating who the bot is trading with.")]
     public bool CreateTradeStart { get; set; } = true;
 
-    [Category(Operation), Description("Genere detalles de inicio de comercio, indicando qué está comercializando el bot.")]
+    [Category(Operation), Description("Generate trade start details, indicating what the bot is trading.")]
     public bool CreateTradeStartSprite { get; set; } = true;
 
-    [Category(Operation), Description("Genere una lista de personas con las cuales actualmente se intercambian.")]
+    [Category(Operation), Description("Generate a list of People currently being traded.")]
     public bool CreateUserList { get; set; } = true;
 
-    [Category(Operation), Description("Cree un archivo que indique el recuento de usuarios en la cola.")]
+    [Category(Operation), Description("Create a file indicating the count of users in the queue.")]
     public bool CreateUsersInQueue { get; set; } = true;
 
-    [Category(Operation), Description("Cree un archivo que enumere la cantidad de tiempo que ha esperado el usuario retirado de la cola más recientemente.")]
+    [Category(Operation), Description("Create a file listing the amount of time the most recently dequeued user has waited.")]
     public bool CreateWaitedTime { get; set; } = true;
 
-    [Category(Operation), Description("Formato para mostrar la marca de tiempo de espera estimado.")]
+    [Category(Operation), Description("Format to display the Estimated Wait Timestamp.")]
     public string EstimatedFulfillmentFormat { get; set; } = @"hh\:mm\:ss";
 
     // Estimated Time
-    [Category(Operation), Description("Formato para mostrar el tiempo de espera estimado.")]
+    [Category(Operation), Description("Format to display the Estimated Wait Time.")]
     public string EstimatedTimeFormat { get; set; } = "Estimated time: {0:F1} minutes";
 
-    [Category(Operation), Description("Formato para mostrar la lista de usuarios disponibles. {0} = ID, {3} = Usuario")]
+    [Category(Operation), Description("Format to display the on-deck list users. {0} = ID, {3} = User")]
     public string OnDeckFormat { get; set; } = "(ID {0}) - {3}";
 
-    [Category(Operation), Description("Formato para mostrar la lista de usuarios número 2 disponibles. {0} = ID, {3} = Usuario")]
+    [Category(Operation), Description("Format to display the on-deck #2 list users. {0} = ID, {3} = User")]
     public string OnDeckFormat2 { get; set; } = "(ID {0}) - {3}";
 
-    [Category(Operation), Description("Separador para dividir la lista de usuarios en cubierta.")]
+    [Category(Operation), Description("Separator to split the on-deck list users.")]
     public string OnDeckSeparator { get; set; } = "\n";
 
-    [Category(Operation), Description("Separador para dividir la lista de usuarios número 2 en cubierta.")]
+    [Category(Operation), Description("Separator to split the on-deck #2 list users.")]
     public string OnDeckSeparator2 { get; set; } = "\n";
 
-    [Category(Operation), Description("Número de usuarios disponibles para omitir en la parte superior. Si desea ocultar las personas que se están procesando, configúrelo según su número de consolas.")]
+    [Category(Operation), Description("Number of on-deck users to skip at the top. If you want to hide people being processed, set this to your number of consoles.")]
     public int OnDeckSkip { get; set; }
 
-    [Category(Operation), Description("Número de usuarios n.° 2 en cubierta que se deben omitir en la parte superior. Si desea ocultar las personas que se están procesando, configúrelo según su número de consolas.")]
+    [Category(Operation), Description("Number of on-deck #2 users to skip at the top. If you want to hide people being processed, set this to your number of consoles.")]
     public int OnDeckSkip2 { get; set; }
 
     // On Deck
-    [Category(Operation), Description("Número de usuarios a mostrar en la lista en cubierta.")]
+    [Category(Operation), Description("Number of users to show in the on-deck list.")]
     public int OnDeckTake { get; set; } = 5;
 
     // On Deck 2
-    [Category(Operation), Description("Número de usuarios que se mostrarán en la lista número 2 disponible.")]
+    [Category(Operation), Description("Number of users to show in the on-deck #2 list.")]
     public int OnDeckTake2 { get; set; } = 5;
 
     // TradeCodeBlock
-    [Category(Operation), Description("Nombre del archivo fuente de la imagen que se copiará cuando se ingrese un código comercial. Si se deja vacío, se creará una imagen de marcador de posición.")]
+    [Category(Operation), Description("Source File name of the image to be copied when a trade code is being entered. If left empty, will create a placeholder image.")]
     public string TradeBlockFile { get; set; } = string.Empty;
 
-    [Category(Operation), Description("Nombre del archivo de destino de la imagen de bloqueo del Código de Enlace. {0} se reemplaza con la dirección IP local.")]
+    [Category(Operation), Description("Destination file name of the Link Code blocking image. {0} gets replaced with the local IP address.")]
     public string TradeBlockFormat { get; set; } = "block_{0}.png";
 
-    [Category(Operation), Description("Formato para mostrar los detalles de Now Trading. {0} = ID, {1} = Usuario")]
+    [Category(Operation), Description("Format to display the Now Trading details. {0} = ID, {1} = User")]
     public string TrainerTradeStart { get; set; } = "(ID {0}) {1}";
 
-    [Category(Operation), Description("Formato para mostrar la lista de usuarios. {0} = ID, {3} = Usuario")]
+    [Category(Operation), Description("Format to display the list users. {0} = ID, {3} = User")]
     public string UserListFormat { get; set; } = "(ID {0}) - {3}";
 
-    [Category(Operation), Description("Separador para dividir la lista de usuarios.")]
+    [Category(Operation), Description("Separator to split the list users.")]
     public string UserListSeparator { get; set; } = ", ";
 
-    [Category(Operation), Description("Número de usuarios a saltar en la parte superior. Si desea ocultar las personas que se están procesando, configúrelo según su número de consolas.")]
+    [Category(Operation), Description("Number of users to skip at the top. If you want to hide people being processed, set this to your number of consoles.")]
     public int UserListSkip { get; set; }
 
     // User List
-    [Category(Operation), Description("Número de usuarios a mostrar en la lista.")]
+    [Category(Operation), Description("Number of users to show in the list.")]
     public int UserListTake { get; set; } = -1;
 
     // Users in Queue
-    [Category(Operation), Description("Formato para mostrar los usuarios en cola. {0} = Contar")]
+    [Category(Operation), Description("Format to display the Users in Queue. {0} = Count")]
     public string UsersInQueueFormat { get; set; } = "Users in Queue: {0}";
 
     // Waited Time
-    [Category(Operation), Description("Formato para mostrar el tiempo de espera del usuario retirado de la cola más recientemente.")]
+    [Category(Operation), Description("Format to display the Waited Time for the most recently dequeued user.")]
     public string WaitedTimeFormat { get; set; } = @"hh\:mm\:ss";
 
     public void EndEnterCode(PokeRoutineExecutorBase b)
@@ -228,7 +228,7 @@ public class StreamSettings
         }
     }
 
-    public override string ToString() => "Configuración de transmisión";
+    public override string ToString() => "Stream Settings";
 
     private static void GenerateBotSprite<T>(PokeRoutineExecutorBase b, PokeTradeDetail<T> detail) where T : PKM, new()
     {
