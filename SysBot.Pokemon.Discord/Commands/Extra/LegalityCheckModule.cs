@@ -8,7 +8,7 @@ namespace SysBot.Pokemon.Discord;
 public class LegalityCheckModule : ModuleBase<SocketCommandContext>
 {
     [Command("lc"), Alias("check", "validate", "verify")]
-    [Summary("Verifica la legalidad del archivo adjunto.")]
+    [Summary("Verifies the attachment for legality.")]
     public async Task LegalityCheck()
     {
         foreach (var att in (System.Collections.Generic.IReadOnlyCollection<Attachment>)Context.Message.Attachments)
@@ -16,7 +16,7 @@ public class LegalityCheckModule : ModuleBase<SocketCommandContext>
     }
 
     [Command("lcv"), Alias("verbose")]
-    [Summary("Verifica la legalidad del archivo adjunto con una salida detallada.")]
+    [Summary("Verifies the attachment for legality with a verbose output.")]
     public async Task LegalityCheckVerbose()
     {
         foreach (var att in (System.Collections.Generic.IReadOnlyCollection<Attachment>)Context.Message.Attachments)
@@ -37,16 +37,16 @@ public class LegalityCheckModule : ModuleBase<SocketCommandContext>
         var builder = new EmbedBuilder
         {
             Color = la.Valid ? Color.Green : Color.Red,
-            Description = $"Informe de legalidad para: {download.SanitizedFileName}:",
+            Description = $"Legality Report for {download.SanitizedFileName}:",
         };
 
         builder.AddField(x =>
         {
-            x.Name = la.Valid ? "<a:yes:1206485105674166292> Válido" : "<a:no:1206485104424128593> Inválido";
+            x.Name = la.Valid ? "Valid" : "Invalid";
             x.Value = la.Report(verbose);
             x.IsInline = false;
         });
 
-        await ReplyAsync("Aquí está el informe de legalidad!", false, builder.Build()).ConfigureAwait(false);
+        await ReplyAsync("Here's the legality report!", false, builder.Build()).ConfigureAwait(false);
     }
 }

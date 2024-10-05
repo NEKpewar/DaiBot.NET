@@ -28,11 +28,11 @@ public static class QueueHelper<T> where T : PKM, new()
 
     private static readonly Dictionary<ulong, int> userBatchTradeMaxDetailId = [];
 
-    public static async Task AddToQueueAsync(SocketCommandContext context, int code, string trainer, RequestSignificance sig, T trade, PokeRoutineType routine, PokeTradeType type, SocketUser trader, bool isBatchTrade = false, int batchTradeNumber = 1, int totalBatchTrades = 1, bool isHiddenTrade = false, bool isMysteryTrade = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, bool ignoreAutoOT = false, bool setEdited = false, bool isNonNative = false)
+    public static async Task AddToQueueAsync(SocketCommandContext context, int code, string trainer, RequestSignificance sig, T trade, PokeRoutineType routine, PokeTradeType type, SocketUser trader, bool isBatchTrade = false, int batchTradeNumber = 1, int totalBatchTrades = 1, bool isHiddenTrade = false, bool isMysteryMon = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, bool ignoreAutoOT = false, bool setEdited = false, bool isNonNative = false)
     {
         if ((uint)code > MaxTradeCode)
         {
-            await context.Channel.SendMessageAsync($"<a:warning:1206483664939126795> {context.User.Mention} El código de tradeo debe ser un numero entre: **00000000-99999999**!").ConfigureAwait(false);
+            await context.Channel.SendMessageAsync("Trade code should be 00000000-99999999!").ConfigureAwait(false);
             return;
         }
 
@@ -43,7 +43,7 @@ public static class QueueHelper<T> where T : PKM, new()
                 if (trade is PB7 && lgcode != null)
                 {
                     var (thefile, lgcodeembed) = CreateLGLinkCodeSpriteEmbed(lgcode);
-                    await trader.SendFileAsync(thefile, "Tu código de tradeo sera:", embed: lgcodeembed).ConfigureAwait(false);
+                    await trader.SendFileAsync(thefile, "Your trade code will be.", embed: lgcodeembed).ConfigureAwait(false);
                 }
                 else
                 {
@@ -51,7 +51,7 @@ public static class QueueHelper<T> where T : PKM, new()
                 }
             }
 
-            var result = await AddToTradeQueue(context, trade, code, trainer, sig, routine, isBatchTrade ? PokeTradeType.Batch : type, trader, isBatchTrade, batchTradeNumber, totalBatchTrades, isHiddenTrade, isMysteryTrade, isMysteryEgg, lgcode, ignoreAutoOT, setEdited, isNonNative).ConfigureAwait(false);
+            var result = await AddToTradeQueue(context, trade, code, trainer, sig, routine, isBatchTrade ? PokeTradeType.Batch : type, trader, isBatchTrade, batchTradeNumber, totalBatchTrades, isHiddenTrade, isMysteryMon, isMysteryEgg, lgcode, ignoreAutoOT, setEdited, isNonNative).ConfigureAwait(false);
         }
         catch (HttpException ex)
         {
@@ -64,20 +64,15 @@ public static class QueueHelper<T> where T : PKM, new()
         return AddToQueueAsync(context, code, trainer, sig, trade, routine, type, context.User, ignoreAutoOT: ignoreAutoOT);
     }
 
-    private static async Task<TradeQueueResult> AddToTradeQueue(SocketCommandContext context, T pk, int code, string trainerName, RequestSignificance sig, PokeRoutineType type, PokeTradeType t, SocketUser trader, bool isBatchTrade, int batchTradeNumber, int totalBatchTrades, bool isHiddenTrade, bool isMysteryTrade = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, bool ignoreAutoOT = false, bool setEdited = false, bool isNonNative = false)
+    private static async Task<TradeQueueResult> AddToTradeQueue(SocketCommandContext context, T pk, int code, string trainerName, RequestSignificance sig, PokeRoutineType type, PokeTradeType t, SocketUser trader, bool isBatchTrade, int batchTradeNumber, int totalBatchTrades, bool isHiddenTrade, bool isMysteryMon = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, bool ignoreAutoOT = false, bool setEdited = false, bool isNonNative = false)
     {
-        string tradingUrl = SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.ExtraEmbedOptions.TradingBotUrl;
-        string NonNative = SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.ExtraEmbedOptions.NonNativeTexT;
-        string AutocorrectText = SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.ExtraEmbedOptions.AutocorrectText;
         var user = trader;
         var userID = user.Id;
         var name = user.Username;
         var trainer = new PokeTradeTrainerInfo(trainerName, userID);
-#pragma warning disable CS8604 // Possible null reference argument.
-        var notifier = new DiscordTradeNotifier<T>(pk, trainer, code, trader, batchTradeNumber, totalBatchTrades, isMysteryTrade, isMysteryEgg, lgcode: lgcode);
-#pragma warning restore CS8604 // Possible null reference argument.
+        var notifier = new DiscordTradeNotifier<T>(pk, trainer, code, trader, batchTradeNumber, totalBatchTrades, isMysteryMon, isMysteryEgg, lgcode: lgcode);
         var uniqueTradeID = GenerateUniqueTradeID();
-        var detail = new PokeTradeDetail<T>(pk, trainer, notifier, t, code, sig == RequestSignificance.Favored, lgcode, batchTradeNumber, totalBatchTrades, isMysteryTrade, isMysteryEgg, uniqueTradeID, ignoreAutoOT, setEdited);
+        var detail = new PokeTradeDetail<T>(pk, trainer, notifier, t, code, sig == RequestSignificance.Favored, lgcode, batchTradeNumber, totalBatchTrades, isMysteryMon, isMysteryEgg, uniqueTradeID, ignoreAutoOT, setEdited);
         var trade = new TradeEntry<T>(detail, userID, PokeRoutineType.LinkTrade, name, uniqueTradeID);
         var hub = SysCord<T>.Runner.Hub;
         var Info = hub.Queues.Info;
@@ -100,42 +95,27 @@ public static class QueueHelper<T> where T : PKM, new()
         }
 
         var embedData = DetailsExtractor<T>.ExtractPokemonDetails(
-            pk, trader, isMysteryTrade, isMysteryEgg, type == PokeRoutineType.Clone, type == PokeRoutineType.Dump,
-            type == PokeRoutineType.FixOT, type == PokeRoutineType.SeedCheck, isBatchTrade, batchTradeNumber, totalBatchTrades, t
+            pk, trader, isMysteryMon, isMysteryEgg, type == PokeRoutineType.Clone, type == PokeRoutineType.Dump,
+            type == PokeRoutineType.FixOT, type == PokeRoutineType.SeedCheck, isBatchTrade, batchTradeNumber, totalBatchTrades
         );
 
         try
         {
-            var itemImageUrl = string.Empty;
-            if (t == PokeTradeType.Item && !string.IsNullOrWhiteSpace(embedData.HeldItem))
-            {
-                string heldItemName = embedData.HeldItem.ToLower().Replace(" ", "");
-                itemImageUrl = $"https://serebii.net/itemdex/sprites/sv/{heldItemName}.png";
-            }
+            (string embedImageUrl, DiscordColor embedColor) = await PrepareEmbedDetails(pk);
 
-            (string embedImageUrl, DiscordColor embedColor) = await PrepareEmbedDetails(pk, t, itemImageUrl);
-
-            embedData.EmbedImageUrl = isMysteryTrade ? "https://i.imgur.com/FdESYAv.png" :
-                                      isMysteryEgg ? "https://i.imgur.com/AwuBs4D.png" :
-                                       type == PokeRoutineType.Dump ? "https://i.imgur.com/9wfEHwZ.png" :
-                                       type == PokeRoutineType.Clone ? "https://i.imgur.com/aSTCjUn.png" :
-                                       type == PokeRoutineType.SeedCheck ? "https://i.imgur.com/EI1BHr5.png" :
-                                       type == PokeRoutineType.FixOT ? "https://i.imgur.com/gRZGFIi.png" :
+            embedData.EmbedImageUrl = isMysteryMon ? "https://i.imgur.com/FdESYAv.png" :
+                                      isMysteryEgg ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/mysteryegg3.png" :
+                                       type == PokeRoutineType.Dump ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/128x128/dumpball.png" :
+                                       type == PokeRoutineType.Clone ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/clonepod.png" :
+                                       type == PokeRoutineType.SeedCheck ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/specialrequest.png" :
+                                       type == PokeRoutineType.FixOT ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/128x128/rocketball.png" :
                                        embedImageUrl;
 
             embedData.HeldItemUrl = string.Empty;
             if (!string.IsNullOrWhiteSpace(embedData.HeldItem))
             {
                 string heldItemName = embedData.HeldItem.ToLower().Replace(" ", "");
-                // Verificar el tipo de intercambio para decidir la URL
-                if (t == PokeTradeType.Item)
-                {
-                    embedData.HeldItemUrl = $"https://serebii.net/itemdex/sprites/sv/{heldItemName}.png";
-                }
-                else
-                {
-                    embedData.HeldItemUrl = $"https://serebii.net/itemdex/sprites/{heldItemName}.png";
-                }
+                embedData.HeldItemUrl = $"https://serebii.net/itemdex/sprites/{heldItemName}.png";
             }
 
             embedData.IsLocalFile = File.Exists(embedData.EmbedImageUrl);
@@ -143,15 +123,8 @@ public static class QueueHelper<T> where T : PKM, new()
             var position = Info.CheckPosition(userID, uniqueTradeID, type);
             var botct = Info.Hub.Bots.Count;
             var baseEta = position.Position > botct ? Info.Hub.Config.Queues.EstimateDelay(position.Position, botct) : 0;
-            var etaMessage = $"Tiempo Estimado: {baseEta:F1} minuto(s) para el trade {batchTradeNumber}/{totalBatchTrades}.";
-            string footerText = string.Empty;
-
-            if (totalTradeCount > 0)
-            {
-                footerText += $"Trades: {totalTradeCount}\n";
-            }
-
-            footerText += $"Posición actual: {(position.Position == -1 ? 1 : position.Position)}";
+            var etaMessage = $"Estimated: {baseEta:F1} min(s) for trade {batchTradeNumber}/{totalBatchTrades}.";
+            string footerText = $"Current Position: {(position.Position == -1 ? 1 : position.Position)}";
 
             string userDetailsText = DetailsExtractor<T>.GetUserDetails(totalTradeCount, tradeDetails);
             if (!string.IsNullOrEmpty(userDetailsText))
@@ -162,66 +135,48 @@ public static class QueueHelper<T> where T : PKM, new()
 
             var embedBuilder = new EmbedBuilder()
                 .WithColor(embedColor)
+                .WithImageUrl(embedData.IsLocalFile ? $"attachment://{Path.GetFileName(embedData.EmbedImageUrl)}" : embedData.EmbedImageUrl)
                 .WithFooter(footerText)
                 .WithAuthor(new EmbedAuthorBuilder()
                     .WithName(embedData.AuthorName)
                     .WithIconUrl(trader.GetAvatarUrl() ?? trader.GetDefaultAvatarUrl())
-                    .WithUrl(tradingUrl));
-
-            // Decidir la imagen principal y el thumbnail basado en el tipo de intercambio
-            if (t == PokeTradeType.Item && !string.IsNullOrEmpty(embedData.HeldItemUrl))
-            {
-                embedBuilder.WithImageUrl(embedData.HeldItemUrl);
-            }
-            else
-            {
-                if (embedData.IsLocalFile)
-                {
-                    embedBuilder.WithImageUrl($"attachment://{Path.GetFileName(embedData.EmbedImageUrl)}");
-                }
-                else
-                {
-                    embedBuilder.WithImageUrl(embedData.EmbedImageUrl);
-                }
-            }
+                    .WithUrl("https://genpkm.com"));
 
             DetailsExtractor<T>.AddAdditionalText(embedBuilder);
 
-            if (!isMysteryTrade && !isMysteryEgg && type != PokeRoutineType.Clone && type != PokeRoutineType.Dump && type != PokeRoutineType.FixOT && type != PokeRoutineType.SeedCheck)
+            if (!isMysteryMon && !isMysteryEgg && type != PokeRoutineType.Clone && type != PokeRoutineType.Dump && type != PokeRoutineType.FixOT && type != PokeRoutineType.SeedCheck)
             {
                 DetailsExtractor<T>.AddNormalTradeFields(embedBuilder, embedData, trader.Mention, pk);
             }
             else
             {
-                DetailsExtractor<T>.AddSpecialTradeFields(embedBuilder, isMysteryTrade, isMysteryEgg, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Clone, type == PokeRoutineType.FixOT, trader.Mention);
+                DetailsExtractor<T>.AddSpecialTradeFields(embedBuilder, isMysteryMon, isMysteryEgg, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Clone, type == PokeRoutineType.FixOT, trader.Mention);
             }
 
             if (setEdited && Info.Hub.Config.Trade.AutoCorrectConfig.AutoCorrectEmbedIndicator)
             {
                 embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/setedited.png";
-                embedBuilder.AddField("__**Aviso**__: **Tu conjunto de showdown no era válido.**", $"{AutocorrectText}");
+                embedBuilder.AddField("**__Notice__**: **Your Showdown Set was Invalid.**", "*Auto Corrected to make legal.*");
             }
             if (isNonNative)
             {
                 embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
-                embedBuilder.AddField("__**Aviso**__: **Este Pokémon no es nativo.**", $"{NonNative}");
+                embedBuilder.AddField("**__Notice__**: **This Pokemon is Non-Native.**", "*Cannot enter HOME & AutoOT not applied.*");
             }
-
-            DetailsExtractor<T>.AddThumbnails(embedBuilder, type == PokeRoutineType.Clone, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Dump, type == PokeRoutineType.FixOT, embedData.HeldItemUrl, pk, t);
+            DetailsExtractor<T>.AddThumbnails(embedBuilder, type == PokeRoutineType.Clone, type == PokeRoutineType.SeedCheck, embedData.HeldItemUrl);
 
             if (!isHiddenTrade && SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.UseEmbeds)
             {
                 var embed = embedBuilder.Build();
                 if (embed == null)
                 {
-                    Console.WriteLine("Error: El embed es nulo.");
-                    await context.Channel.SendMessageAsync("<a:warning:1206483664939126795> Se produjo un error al preparar los detalles comerciales..");
+                    Console.WriteLine("Error: Embed is null.");
+                    await context.Channel.SendMessageAsync("An error occurred while preparing the trade details.");
                     return new TradeQueueResult(false);
                 }
 
-                if (t != PokeTradeType.Item && embedData.IsLocalFile)
+                if (embedData.IsLocalFile)
                 {
-                    // Envía el archivo local solo si no es un intercambio de tipo Item
                     await context.Channel.SendFileAsync(embedData.EmbedImageUrl, embed: embed);
                     if (isBatchTrade)
                     {
@@ -244,7 +199,7 @@ public static class QueueHelper<T> where T : PKM, new()
             }
             else
             {
-                var message = $"{trader.Mention} ➜ Agregado a la cola de intercambio de enlaces. Posicion actual: {position.Position}. Recibiendo: **{embedData.SpeciesName}**.\n{etaMessage}";
+                var message = $"{trader.Mention} - Added to the LinkTrade queue. Current Position: {position.Position}. Receiving: {embedData.SpeciesName}.\n{etaMessage}";
                 await context.Channel.SendMessageAsync(message);
             }
         }
@@ -293,14 +248,14 @@ public static class QueueHelper<T> where T : PKM, new()
         return filePath;
     }
 
-    private static async Task<(string, DiscordColor)> PrepareEmbedDetails(T pk, PokeTradeType tradeType, string itemImageUrl = "")
+    private static async Task<(string, DiscordColor)> PrepareEmbedDetails(T pk)
     {
         string embedImageUrl;
         string speciesImageUrl;
 
         if (pk.IsEgg)
         {
-            const string eggImageUrl = "https://i.imgur.com/3Tb8VX3.png";
+            const string eggImageUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/egg.png";
             speciesImageUrl = TradeExtensions<T>.PokeImg(pk, false, true, null);
             System.Drawing.Image combinedImage = await OverlaySpeciesOnEgg(eggImageUrl, speciesImageUrl);
             embedImageUrl = SaveImageLocally(combinedImage);
@@ -325,8 +280,10 @@ public static class QueueHelper<T> where T : PKM, new()
 
         string ballImgUrl = $"https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/20x20/{ballName}.png";
 
+        // Check if embedImageUrl is a local file or a web URL
         if (Uri.TryCreate(embedImageUrl, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeFile)
         {
+            // Load local image directly
 #pragma warning disable CA1416 // Validate platform compatibility
             using var localImage = System.Drawing.Image.FromFile(uri.LocalPath);
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -354,25 +311,14 @@ public static class QueueHelper<T> where T : PKM, new()
 
             if (!ballImageLoaded)
             {
-                Console.WriteLine($"No se pudo cargar la imagen de la pokeball: {ballImgUrl}");
+                Console.WriteLine($"Ball image could not be loaded: {ballImgUrl}");
+
+                // await context.Channel.SendMessageAsync($"Ball image could not be loaded: {ballImgUrl}"); // for debugging purposes
             }
         }
 
-        DiscordColor embedColor;
-
-        if (tradeType == PokeTradeType.Item && !string.IsNullOrEmpty(itemImageUrl))
-        {
-            (int R, int G, int B) = await GetDominantColorAsync(itemImageUrl);
-            embedColor = new DiscordColor(R, G, B);
-        }
-        else
-        {
-            string colorImageUrl = pk.IsEgg ? speciesImageUrl : embedImageUrl;
-            (int R, int G, int B) = await GetDominantColorAsync(colorImageUrl);
-            embedColor = new DiscordColor(R, G, B);
-        }
-
-        return (embedImageUrl, embedColor);
+        (int R, int G, int B) = await GetDominantColorAsync(embedImageUrl);
+        return (embedImageUrl, new DiscordColor(R, G, B));
     }
 
     private static async Task<(System.Drawing.Image, bool)> OverlayBallOnSpecies(string speciesImageUrl, string ballImageUrl)
@@ -381,7 +327,7 @@ public static class QueueHelper<T> where T : PKM, new()
         {
             if (speciesImage == null)
             {
-                Console.WriteLine("No se pudo cargar la imagen de la especie.");
+                Console.WriteLine("Species image could not be loaded.");
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
                 return (null, false);
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
@@ -390,7 +336,7 @@ public static class QueueHelper<T> where T : PKM, new()
             var ballImage = await LoadImageFromUrl(ballImageUrl);
             if (ballImage == null)
             {
-                Console.WriteLine($"No se pudo cargar la imagen de la pokeball: {ballImageUrl}");
+                Console.WriteLine($"Ball image could not be loaded: {ballImageUrl}");
 #pragma warning disable CA1416 // Validate platform compatibility
                 return ((System.Drawing.Image)speciesImage.Clone(), false);
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -408,6 +354,7 @@ public static class QueueHelper<T> where T : PKM, new()
                     graphics.DrawImage(ballImage, ballPosition);
 #pragma warning restore CA1416 // Validate platform compatibility
                 }
+#pragma warning restore CA1416 // Validate platform compatibility
 
 #pragma warning disable CA1416 // Validate platform compatibility
                 return ((System.Drawing.Image)speciesImage.Clone(), true);
@@ -451,6 +398,7 @@ public static class QueueHelper<T> where T : PKM, new()
             g.DrawImage(resizedSpeciesImage, speciesX, speciesY, resizedSpeciesImage.Width, resizedSpeciesImage.Height);
 #pragma warning restore CA1416 // Validate platform compatibility
         }
+#pragma warning restore CA1416 // Validate platform compatibility
 
         // Dispose of the species image and the resized species image if they're no longer needed
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -490,6 +438,7 @@ public static class QueueHelper<T> where T : PKM, new()
             g.DrawImage(eggImage, x, y, newWidth, newHeight);
 #pragma warning restore CA1416 // Validate platform compatibility
         }
+#pragma warning restore CA1416 // Validate platform compatibility
 #pragma warning disable CA1416 // Validate platform compatibility
         eggImage.Dispose();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -502,14 +451,14 @@ public static class QueueHelper<T> where T : PKM, new()
         HttpResponseMessage response = await client.GetAsync(url);
         if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"No se pudo cargar la imagen desde {url}. Código de estado: {response.StatusCode}");
+            Console.WriteLine($"Failed to load image from {url}. Status code: {response.StatusCode}");
             return null;
         }
 
         Stream stream = await response.Content.ReadAsStreamAsync();
         if (stream == null || stream.Length == 0)
         {
-            Console.WriteLine($"No se recibieron datos o flujo vacío de {url}");
+            Console.WriteLine($"No data or empty stream received from {url}");
             return null;
         }
 
@@ -521,7 +470,7 @@ public static class QueueHelper<T> where T : PKM, new()
         }
         catch (ArgumentException ex)
         {
-            Console.WriteLine($"No se pudo crear la imagen a partir de la transmisión. URL: {url}, excepción: {ex}");
+            Console.WriteLine($"Failed to create image from stream. URL: {url}, Exception: {ex}");
             return null;
         }
     }
@@ -557,7 +506,7 @@ public static class QueueHelper<T> where T : PKM, new()
             }
             catch (IOException ex)
             {
-                Console.WriteLine($"Error al eliminar el archivo: {ex.Message}");
+                Console.WriteLine($"Error deleting file: {ex.Message}");
             }
         }
     }
@@ -630,7 +579,9 @@ public static class QueueHelper<T> where T : PKM, new()
                         colorCount[quantizedColor] = combinedFactor;
                     }
                 }
+#pragma warning restore CA1416 // Validate platform compatibility
             }
+#pragma warning restore CA1416 // Validate platform compatibility
 
 #pragma warning disable CA1416 // Validate platform compatibility
             image.Dispose();
@@ -645,7 +596,7 @@ public static class QueueHelper<T> where T : PKM, new()
         catch (Exception ex)
         {
             // Log or handle exceptions as needed
-            Console.WriteLine($"Error al procesar la imagen desde {imagePath}. Error: {ex.Message}");
+            Console.WriteLine($"Error processing image from {imagePath}. Error: {ex.Message}");
             return (255, 255, 255);  // Default to white if an exception occurs
         }
     }
@@ -681,7 +632,7 @@ public static class QueueHelper<T> where T : PKM, new()
                     if (!permissions.SendMessages)
                     {
                         // Nag the owner in logs.
-                        message = "¡Debes otorgarme permisos para \"Enviar mensajes\"!";
+                        message = "You must grant me \"Send Messages\" permissions!";
                         Base.LogUtil.LogError(message, "QueueHelper");
                         return;
                     }
@@ -689,7 +640,7 @@ public static class QueueHelper<T> where T : PKM, new()
                     {
                         var app = await context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
                         var owner = app.Owner.Id;
-                        message = $"<@{owner}> ¡Debes otorgarme permisos de \"Administrar mensajes\"!";
+                        message = $"<@{owner}> You must grant me \"Manage Messages\" permissions!";
                     }
                 }
                 break;
@@ -697,7 +648,7 @@ public static class QueueHelper<T> where T : PKM, new()
             case DiscordErrorCode.CannotSendMessageToUser:
                 {
                     // The user either has DMs turned off, or Discord thinks they do.
-                    message = context.User == trader ? "Debes habilitar los mensajes privados para estar en la cola.!" : "El usuario mencionado debe habilitar los mensajes privados para que estén en cola.!";
+                    message = context.User == trader ? "You must enable private messages in order to be queued!" : "The mentioned user must enable private messages in order for them to be queued!";
                 }
                 break;
 
@@ -789,6 +740,7 @@ public static class QueueHelper<T> where T : PKM, new()
                 new Rectangle(new Point(), spritearray[2].Size), GraphicsUnit.Pixel);
 #pragma warning restore CA1416 // Validate platform compatibility
         }
+#pragma warning restore CA1416 // Validate platform compatibility
         System.Drawing.Image finalembedpic = outputImage;
         var filename = $"{Directory.GetCurrentDirectory()}//finalcode.png";
 #pragma warning disable CA1416 // Validate platform compatibility

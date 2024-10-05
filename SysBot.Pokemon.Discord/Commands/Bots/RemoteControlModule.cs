@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace SysBot.Pokemon.Discord;
 
-[Summary("Controla remotamente un bot.")]
+[Summary("Remotely controls a bot.")]
 public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new()
 {
     [Command("click")]
-    [Summary("Hace clic en el botón especificado.")]
+    [Summary("Clicks the specified button.")]
     [RequireRoleAccess(nameof(DiscordManager.RolesRemoteControl))]
     public async Task ClickAsync(SwitchButton b)
     {
         var bot = SysCord<T>.Runner.Bots.Find(z => IsRemoteControlBot(z.Bot));
         if (bot == null)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
+            await ReplyAsync($"No bot is available to execute your command: {b}").ConfigureAwait(false);
             return;
         }
 
@@ -26,14 +26,14 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     }
 
     [Command("click")]
-    [Summary("Hace clic en el botón especificado.")]
+    [Summary("Clicks the specified button.")]
     [RequireSudo]
     public async Task ClickAsync(string ip, SwitchButton b)
     {
         var bot = SysCord<T>.Runner.GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
+            await ReplyAsync($"No bot is available to execute your command: {b}").ConfigureAwait(false);
             return;
         }
 
@@ -42,7 +42,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
 
     [Command("setScreenOff")]
     [Alias("screenOff", "scrOff")]
-    [Summary("Apaga la pantalla")]
+    [Summary("Turns the screen off")]
     [RequireSudo]
     public async Task SetScreenOffAsync()
     {
@@ -51,7 +51,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
 
     [Command("setScreenOn")]
     [Alias("screenOn", "scrOn")]
-    [Summary("Enciende la pantalla")]
+    [Summary("Turns the screen on")]
     [RequireSudo]
     public async Task SetScreenOnAsync()
     {
@@ -59,14 +59,14 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     }
 
     [Command("setStick")]
-    [Summary("Coloca el joystick en la posición especificada.")]
+    [Summary("Sets the stick to the specified position.")]
     [RequireRoleAccess(nameof(DiscordManager.RolesRemoteControl))]
     public async Task SetStickAsync(SwitchStick s, short x, short y, ushort ms = 1_000)
     {
         var bot = SysCord<T>.Runner.Bots.Find(z => IsRemoteControlBot(z.Bot));
         if (bot == null)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> No hay ningún bot disponible para ejecutar tu comando: {s}").ConfigureAwait(false);
+            await ReplyAsync($"No bot is available to execute your command: {s}").ConfigureAwait(false);
             return;
         }
 
@@ -74,14 +74,14 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     }
 
     [Command("setStick")]
-    [Summary("Coloca el joystick en la posición especificada.")]
+    [Summary("Sets the stick to the specified position.")]
     [RequireSudo]
     public async Task SetStickAsync(string ip, SwitchStick s, short x, short y, ushort ms = 1_000)
     {
         var bot = SysCord<T>.Runner.GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+            await ReplyAsync($"No bot has that IP address ({ip}).").ConfigureAwait(false);
             return;
         }
 
@@ -101,14 +101,14 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     {
         if (!Enum.IsDefined(typeof(SwitchButton), button))
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Valor del botón desconocido: {button}").ConfigureAwait(false);
+            await ReplyAsync($"Unknown button value: {button}").ConfigureAwait(false);
             return;
         }
 
         var b = bot.Bot;
         var crlf = b is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
         await b.Connection.SendAsync(SwitchCommand.Click(button, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync($"{b.Connection.Name} ha realizado: {button}").ConfigureAwait(false);
+        await ReplyAsync($"{b.Connection.Name} has performed: {button}").ConfigureAwait(false);
     }
 
     private static string GetRunningBotIP()
@@ -134,30 +134,30 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP ({ip}).").ConfigureAwait(false);
+            await ReplyAsync($"No bot has that IP address ({ip}).").ConfigureAwait(false);
             return;
         }
 
         var b = bot.Bot;
         var crlf = b is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
         await b.Connection.SendAsync(SwitchCommand.SetScreen(on ? ScreenState.On : ScreenState.Off, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync("<a:yes:1206485105674166292> Estado de la pantalla establecido en: " + (on ? "On" : "Off")).ConfigureAwait(false);
+        await ReplyAsync("Screen state set to: " + (on ? "On" : "Off")).ConfigureAwait(false);
     }
 
     private async Task SetStickAsyncImpl(SwitchStick s, short x, short y, ushort ms, BotSource<PokeBotState> bot)
     {
         if (!Enum.IsDefined(typeof(SwitchStick), s))
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Stick desconocido: {s}").ConfigureAwait(false);
+            await ReplyAsync($"Unknown stick: {s}").ConfigureAwait(false);
             return;
         }
 
         var b = bot.Bot;
         var crlf = b is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
         await b.Connection.SendAsync(SwitchCommand.SetStick(s, x, y, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync($"{b.Connection.Name} ha realizado: {s}").ConfigureAwait(false);
+        await ReplyAsync($"{b.Connection.Name} has performed: {s}").ConfigureAwait(false);
         await Task.Delay(ms).ConfigureAwait(false);
         await b.Connection.SendAsync(SwitchCommand.ResetStick(s, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync($"{b.Connection.Name} ha restablecido la posición del stick.").ConfigureAwait(false);
+        await ReplyAsync($"{b.Connection.Name} has reset the stick position.").ConfigureAwait(false);
     }
 }

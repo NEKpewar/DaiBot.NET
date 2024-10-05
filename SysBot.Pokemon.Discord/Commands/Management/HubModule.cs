@@ -13,7 +13,7 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
 {
     [Command("status")]
     [Alias("stats")]
-    [Summary("Obtiene el estado del entorno del bot.")]
+    [Summary("Gets the status of the bot environment.")]
     public async Task GetStatusAsync()
     {
         var me = SysCord<T>.Runner;
@@ -29,10 +29,10 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
         var botCount = allBots.Count;
         builder.AddField(x =>
         {
-            x.Name = "Resumen:";
+            x.Name = "Summary";
             x.Value =
-                $"Recuento de bots: {botCount}\n" +
-                $"Estado de los Bot: {SummarizeBots(allBots)}\n" +
+                $"Bot Count: {botCount}\n" +
+                $"Bot State: {SummarizeBots(allBots)}\n" +
                 $"Pool Count: {hub.Ledy.Pool.Count}\n";
             x.IsInline = false;
         });
@@ -43,8 +43,8 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
             var lines = bots.SelectMany(z => z.Counts.GetNonZeroCounts()).Distinct();
             var msg = string.Join("\n", lines);
             if (string.IsNullOrWhiteSpace(msg))
-                msg = "<a:warning:1206483664939126795> Aún no se ha contabilizado nada!";
-            x.Name = "Recuentos:";
+                msg = "Nothing counted yet!";
+            x.Name = "Counts";
             x.Value = msg;
             x.IsInline = false;
         });
@@ -60,10 +60,10 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
             var nextMsg = GetNextName(q);
             builder.AddField(x =>
             {
-                x.Name = $"Cola {q.Type}";
+                x.Name = $"{q.Type} Queue";
                 x.Value =
-                    $"Siguiente: {nextMsg}\n" +
-                    $"Conteo: {c}\n";
+                    $"Next: {nextMsg}\n" +
+                    $"Count: {c}\n";
                 x.IsInline = false;
             });
             count += c;
@@ -73,8 +73,8 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
         {
             builder.AddField(x =>
             {
-                x.Name = "<a:warning:1206483664939126795> Las colas de espera están vacías.";
-                x.Value = "<a:warning:1206483664939126795> Nadie en la cola!";
+                x.Name = "Queues are empty.";
+                x.Value = "Nobody in line!";
                 x.IsInline = false;
             });
         }
@@ -100,7 +100,7 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
     private static string SummarizeBots(IReadOnlyCollection<RoutineExecutor<PokeBotState>> bots)
     {
         if (bots.Count == 0)
-            return "<a:warning:1206483664939126795> No hay bots configurados.";
+            return "No bots configured.";
         var summaries = bots.Select(z => $"- {z.GetSummary()}");
         return Environment.NewLine + string.Join(Environment.NewLine, summaries);
     }

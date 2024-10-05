@@ -16,22 +16,19 @@ namespace SysBot.Pokemon.Discord;
 // Copyright 2017, Christopher F. <foxbot@protonmail.com>
 public class InfoModule : ModuleBase<SocketCommandContext>
 {
-    private const string detail = "Soy un bot de Discord impulsado por PKHeX.Core y otro software de código abierto.";
-
-    private const string gengar = "https://github.com/bdawg1989/MergeBot";
-
-    private const string daifork = "https://github.com/Daiivr/SysBot.NET";
+    private const string detail = "I am an open-source Discord bot powered by PKHeX.Core and other open-source software.";
 
     private const ulong DisallowedUserId = 195756980873199618;
 
+    private const string repo = "https://github.com/bdawg1989/MergeBot";
+
     [Command("info")]
     [Alias("about", "whoami", "owner")]
-    [Summary("Muestra información sobre el bot.")]
     public async Task InfoAsync()
     {
         if (Context.User.Id == DisallowedUserId)
         {
-            await ReplyAsync("<a:no:1206485104424128593> No permitimos que personas turbias usen este comando.").ConfigureAwait(false);
+            await ReplyAsync("We don't let shady people use this command.").ConfigureAwait(false);
             return;
         }
         var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
@@ -43,32 +40,31 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         };
 
         builder.AddField("Info",
-            $"- [Código fuente de Mergebot]({gengar})\n" +
-            $"- [Codigo Fuente de este Bot]({daifork})\n" +
-            $"- {Format.Bold("Propietario")}: {app.Owner} ({app.Owner.Id})\n" +
-            $"- {Format.Bold("Biblioteca")}: Discord.Net ({DiscordConfig.Version})\n" +
-            $"- {Format.Bold("Tiempo de actividad")}: {GetUptime()}\n" +
-            $"- {Format.Bold("Tiempo de ejecución")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
+            $"- [Source Code]({repo})\n- [Join Our Discord!](https://notpaldea.net)\n" +
+            $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
+            $"- {Format.Bold("Library")}: Discord.Net ({DiscordConfig.Version})\n" +
+            $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
+            $"- {Format.Bold("Runtime")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
             $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n" +
-            $"- {Format.Bold("Tiempo de compilación")}: {GetVersionInfo("SysBot.Base", false)}\n" +
-            $"- {Format.Bold("Versión del Bot")}: {TradeBot.Version}\n" +
-            $"- {Format.Bold("Versión de PKHeX")}: {GetVersionInfo("PKHeX.Core")}\n" +
-            $"- {Format.Bold("Versión de AutoLegality")}: {GetVersionInfo("PKHeX.Core.AutoMod")}\n"
+            $"- {Format.Bold("Buildtime")}: {GetVersionInfo("SysBot.Base", false)}\n" +
+            $"- {Format.Bold("Mergebot Version")}: {TradeBot.Version}\n" +
+            $"- {Format.Bold("Core Version")}: {GetVersionInfo("PKHeX.Core")}\n" +
+            $"- {Format.Bold("AutoLegality Version")}: {GetVersionInfo("PKHeX.Core.AutoMod")}\n"
         );
 
-        builder.AddField("Estadísticas",
-            $"- {Format.Bold("Tamaño")}: {GetHeapSize()}MiB\n" +
-            $"- {Format.Bold("Servers")}: {Context.Client.Guilds.Count}\n" +
-            $"- {Format.Bold("Canales")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
-            $"- {Format.Bold("Usuarios")}: {Context.Client.Guilds.Sum(g => g.MemberCount)}\n\n" +
-            $"{Format.Bold("Gracias, [Project Pokémon](https://projectpokemon.org), por hacer públicos los sprites e imágenes de Pokémon utilizados en este bot!")}\n"
+        builder.AddField("Stats",
+            $"- {Format.Bold("Heap Size")}: {GetHeapSize()}MiB\n" +
+            $"- {Format.Bold("Guilds")}: {Context.Client.Guilds.Count}\n" +
+            $"- {Format.Bold("Channels")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
+            $"- {Format.Bold("Users")}: {Context.Client.Guilds.Sum(g => g.MemberCount)}\n"
         );
-        builder.WithThumbnailUrl("https://i.imgur.com/rzwDEDO.png");
-        await ReplyAsync("He aquí un poco de informacion sobre mí!", embed: builder.Build()).ConfigureAwait(false);
+
+        await ReplyAsync("Here's a bit about me!", embed: builder.Build()).ConfigureAwait(false);
     }
 
-    private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString(CultureInfo.CurrentCulture);
+
+    private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
 
     private static string GetVersionInfo(string assemblyName, bool inclVersion = true)
     {

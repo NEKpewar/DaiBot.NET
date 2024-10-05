@@ -17,36 +17,13 @@ namespace SysBot.Pokemon.Discord
 
         [Command("mysteryegg")]
         [Alias("me")]
-        [Summary("Intercambia un huevo generado a partir de un Pokémon aleatorio.")]
+        [Summary("Trades an egg generated from a random Pokémon.")]
         public async Task TradeMysteryEggAsync()
         {
             var userID = Context.User.Id;
             if (Info.IsUserInQueue(userID))
             {
-                var currentTime = DateTime.UtcNow;
-                var formattedTime = currentTime.ToString("hh:mm tt");
-
-                var queueEmbed = new EmbedBuilder
-                {
-                    Color = Color.Red,
-                    ImageUrl = "https://c.tenor.com/rDzirQgBPwcAAAAd/tenor.gif",
-                    ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-                };
-
-                queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
-
-                // Añadir un field al Embed para indicar el error
-                queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
-                queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
-                queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
-
-                queueEmbed.Footer = new EmbedFooterBuilder
-                {
-                    Text = $"{Context.User.Username} • {formattedTime}",
-                    IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-                };
-
-                await ReplyAsync(embed: queueEmbed.Build()).ConfigureAwait(false);
+                await ReplyAsync("You already have an existing trade in the queue. Please wait until it is processed.").ConfigureAwait(false);
                 return;
             }
             var code = Info.GetRandomTradeCode(userID);
@@ -61,7 +38,7 @@ namespace SysBot.Pokemon.Discord
                 catch (Exception ex)
                 {
                     LogUtil.LogSafe(ex, nameof(MysteryEggModule<T>));
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, se produjo un error al procesar la solicitud.").ConfigureAwait(false);
+                    await ReplyAsync("An error occurred while processing the request.").ConfigureAwait(false);
                 }
             });
         }
@@ -104,7 +81,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 attempts++;
             }
-            await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, no se pudo generar un huevo misterioso legal después de 5 intentos. Por favor, inténtelo de nuevo más tarde.").ConfigureAwait(false);
+            await ReplyAsync("Failed to generate a legal mystery egg after 5 attempts. Please try again later.").ConfigureAwait(false);
         }
 
         private static async Task DeleteMessageAfterDelay(IUserMessage message, int delayMilliseconds)
@@ -133,7 +110,7 @@ namespace SysBot.Pokemon.Discord
             else if (typeof(T) == typeof(PK9))
                 return GameVersion.SV;
             else
-                throw new ArgumentException("Versión del juego no compatible.");
+                throw new ArgumentException("Unsupported game version.");
         }
 
         public static List<ushort> GetBreedableSpecies(GameVersion gameVersion, string language = "en")
@@ -173,7 +150,7 @@ namespace SysBot.Pokemon.Discord
                 PersonalTable8SWSH pt => pt.GetFormEntry(species, form),
                 PersonalTable8LA pt => pt.GetFormEntry(species, form),
                 PersonalTable8BDSP pt => pt.GetFormEntry(species, form),
-                _ => throw new ArgumentException("Tipo de tabla personal no compatible."),
+                _ => throw new ArgumentException("Unsupported personal table type."),
             };
         }
 
@@ -185,7 +162,7 @@ namespace SysBot.Pokemon.Discord
                 GameVersion.BDSP => PersonalTable.BDSP,
                 GameVersion.PLA => PersonalTable.LA,
                 GameVersion.SV => PersonalTable.SV,
-                _ => throw new ArgumentException("Versión del juego no compatible."),
+                _ => throw new ArgumentException("Unsupported game version."),
             };
         }
 
@@ -196,14 +173,12 @@ namespace SysBot.Pokemon.Discord
 
             if (!skipLegalityCheck)
             {
-#pragma warning disable CS8604 // Possible null reference argument.
                 la = new LegalityAnalysis(pk);
-#pragma warning restore CS8604 // Possible null reference argument.
                 if (!la.Valid)
                 {
                     string responseMessage;
                     string speciesName = GameInfo.GetStrings("en").specieslist[pk.Species];
-                    responseMessage = $"<a:warning:1206483664939126795> Conjunto de enfrentamiento no válido para un huevo de {speciesName}. Por favor revisa tu información y vuelve a intentarlo..";
+                    responseMessage = $"Invalid Showdown Set for the {speciesName} egg. Please review your information and try again.";
 
                     var reply = await ReplyAsync(responseMessage).ConfigureAwait(false);
                     await Task.Delay(6000);
@@ -214,9 +189,7 @@ namespace SysBot.Pokemon.Discord
             else
             {
                 // If we're skipping the initial check, we still need to create a LegalityAnalysis object
-#pragma warning disable CS8604 // Possible null reference argument.
                 la = new LegalityAnalysis(pk);
-#pragma warning restore CS8604 // Possible null reference argument.
             }
 
             if (!la.Valid && la.Results.Any(m => m.Identifier is CheckIdentifier.Memory))

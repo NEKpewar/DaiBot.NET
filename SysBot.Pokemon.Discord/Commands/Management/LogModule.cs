@@ -25,7 +25,7 @@ public class LogModule : ModuleBase<SocketCommandContext>
     }
 
     [Command("logHere")]
-    [Summary("Hace que el bot inicie sesión en el canal.")]
+    [Summary("Makes the bot log to the channel.")]
     [RequireSudo]
     public async Task AddLogAsync()
     {
@@ -33,7 +33,7 @@ public class LogModule : ModuleBase<SocketCommandContext>
         var cid = c.Id;
         if (Channels.TryGetValue(cid, out _))
         {
-            await ReplyAsync("<a:warning:1206483664939126795> Ya estoy registrando aquí.").ConfigureAwait(false);
+            await ReplyAsync("Already logging here.").ConfigureAwait(false);
             return;
         }
 
@@ -41,46 +41,46 @@ public class LogModule : ModuleBase<SocketCommandContext>
 
         // Add to discord global loggers (saves on program close)
         SysCordSettings.Settings.LoggingChannels.AddIfNew([GetReference(Context.Channel)]);
-        await ReplyAsync("<a:yes:1206485105674166292> ¡Añadida salida de registro a este canal!").ConfigureAwait(false);
+        await ReplyAsync("Added logging output to this channel!").ConfigureAwait(false);
     }
 
     [Command("logClearAll")]
-    [Summary("Borra todas las configuraciones de registro.")]
+    [Summary("Clears all the logging settings.")]
     [RequireSudo]
     public async Task ClearLogsAllAsync()
     {
         foreach (var l in Channels)
         {
             var entry = l.Value;
-            await ReplyAsync($"<a:yes:1206485105674166292> Registro borrado de: {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
+            await ReplyAsync($"Logging cleared from {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
             LogUtil.Forwarders.Remove(entry);
         }
 
         LogUtil.Forwarders.RemoveAll(y => Channels.Select(z => z.Value).Contains(y));
         Channels.Clear();
         SysCordSettings.Settings.LoggingChannels.Clear();
-        await ReplyAsync("<a:yes:1206485105674166292> ¡Registro borrado de todos los canales!").ConfigureAwait(false);
+        await ReplyAsync("Logging cleared from all channels!").ConfigureAwait(false);
     }
 
     [Command("logClear")]
-    [Summary("Borra la configuración de registro en ese canal específico.")]
+    [Summary("Clears the logging settings in that specific channel.")]
     [RequireSudo]
     public async Task ClearLogsAsync()
     {
         var id = Context.Channel.Id;
         if (!Channels.TryGetValue(id, out var log))
         {
-            await ReplyAsync("<a:warning:1206483664939126795> No hay eco en este canal.").ConfigureAwait(false);
+            await ReplyAsync("Not echoing in this channel.").ConfigureAwait(false);
             return;
         }
         LogUtil.Forwarders.Remove(log);
         Channels.Remove(Context.Channel.Id);
         SysCordSettings.Settings.LoggingChannels.RemoveAll(z => z.ID == id);
-        await ReplyAsync($"<a:yes:1206485105674166292> Registro borrado del canal: {Context.Channel.Name}").ConfigureAwait(false);
+        await ReplyAsync($"Logging cleared from channel: {Context.Channel.Name}").ConfigureAwait(false);
     }
 
     [Command("logInfo")]
-    [Summary("Dump la configuración de registro.")]
+    [Summary("Dumps the logging settings.")]
     [RequireSudo]
     public async Task DumpLogInfoAsync()
     {
@@ -99,6 +99,6 @@ public class LogModule : ModuleBase<SocketCommandContext>
     {
         ID = channel.Id,
         Name = channel.Name,
-        Comment = $"Añadido por {Context.User.Username} el {DateTime.Now:yyyy.MM.dd-hh:mm:ss}",
+        Comment = $"Added by {Context.User.Username} on {DateTime.Now:yyyy.MM.dd-hh:mm:ss}",
     };
 }

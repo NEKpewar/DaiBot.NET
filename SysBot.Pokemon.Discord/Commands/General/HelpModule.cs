@@ -1,159 +1,182 @@
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using System;
-using SysBot.Pokemon.Discord;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Discord.Net;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SysBot.Pokemon.Discord;
-
-public class HelpModule(CommandService commandService) : ModuleBase<SocketCommandContext>
+namespace SysBot.Pokemon.Discord
 {
-#pragma warning disable CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
-    private readonly CommandService _commandService = commandService;
-#pragma warning restore CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
-
-    [Command("help")]
-    [Summary("Muestra los comandos disponibles.")]
-    public async Task HelpAsync()
+    public class HelpModule(CommandService commandService) : ModuleBase<SocketCommandContext>
     {
-        var builder = new EmbedBuilder
+        private readonly CommandService _commandService = commandService;
+
+        [Command("help")]
+        [Summary("Shows the available commands.")]
+        public async Task HelpAsync(int page = 1)
         {
-            Color = new Color(114, 137, 218),
-            Description = "📝 Estos son los comandos que puedes usar:",
-        };
+            var mgr = SysCordSettings.Manager;
+            var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
+            var owner = app.Owner.Id;
+            var uid = Context.User.Id;
 
-        var botPrefix = SysCordSettings.HubConfig.Discord.CommandPrefix;
-        var mgr = SysCordSettings.Manager;
-        var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
-        var owner = app.Owner.Id;
-        var uid = Context.User.Id;
+            var modules = _commandService.Modules.ToList();
+            var moduleList = new Dictionary<string, Dictionary<string, string>>();
 
-        int fieldsCount = 0; // Variable para realizar un seguimiento del número de campos agregados
-
-        foreach (var module in commandService.Modules)
-        {
-            string? description = null;
-            HashSet<string> mentioned = new HashSet<string>(); // Corregir la inicialización de HashSet
-
-            foreach (var cmd in module.Commands)
+            foreach (var module in modules)
             {
-                var name = cmd.Name;
-                if (mentioned.Contains(name))
-                    continue;
-                if (cmd.Attributes.Any(z => z is RequireOwnerAttribute) && owner != uid)
-                    continue;
-                if (cmd.Attributes.Any(z => z is RequireSudoAttribute) && !mgr.CanUseSudo(uid))
-                    continue;
+                var moduleName = module.Name;
+                var commandDict = new Dictionary<string, string>();
 
-                mentioned.Add(name);
-                var result = await cmd.CheckPreconditionsAsync(Context).ConfigureAwait(false);
-                if (result.IsSuccess)
-                    description += $"- {cmd.Aliases[0]}\n";
-            }
-            if (string.IsNullOrWhiteSpace(description))
-                continue;
-
-            var moduleName = module.Name;
-            var gen = moduleName.IndexOf('`');
-            if (gen != -1)
-                moduleName = moduleName[..gen];
-
-            builder.AddField(x =>
-            {
-                x.Name = moduleName;
-                x.Value = description;
-                x.IsInline = true;
-            });
-
-            fieldsCount++; // Incrementar el contador de campos agregados
-
-            // Si el número de campos agregados alcanza 25, enviar el EmbedBuilder actual y crear uno nuevo
-            if (fieldsCount >= 25)
-            {
-                await Context.User.SendMessageAsync(embed: builder.Build()).ConfigureAwait(false);
-                builder = new EmbedBuilder
+                foreach (var command in module.Commands)
                 {
-                    Color = new Color(114, 137, 218),
-                    Title = "Continuación de la lista de comandos:", // Agregar título al nuevo EmbedBuilder
-                };
-                fieldsCount = 0; // Restablecer el contador de campos
+                    if (command.CheckPreconditionsAsync(Context).GetAwaiter().GetResult().IsSuccess)
+                    {
+                        if (command.Attributes.Any(a => a is RequireOwnerAttribute) && owner != uid)
+                            continue;
+                        if (command.Attributes.Any(a => a is RequireSudoAttribute) && !mgr.CanUseSudo(uid))
+                            continue;
+
+                        var commandName = command.Name;
+                        var commandSummary = command.Summary ?? "No description available.";
+
+                        if (!commandDict.ContainsKey(commandName))
+                            commandDict.Add(commandName, commandSummary);
+                    }
+                }
+
+                if (commandDict.Count > 0)
+                {
+                    var moduleSanitizedName = moduleName.Split('`')[0];
+
+                    var uniqueModuleName = moduleSanitizedName;
+                    var count = 1;
+                    while (moduleList.ContainsKey(uniqueModuleName))
+                    {
+                        uniqueModuleName = $"{moduleSanitizedName}_{count}";
+                        count++;
+                    }
+
+                    moduleList.Add(uniqueModuleName, commandDict);
+                }
             }
-        }
-        // Aquí agregas el footer antes de enviar la respuesta
-        builder.Footer = new EmbedFooterBuilder
-        {
-            Text = $"Si necesitas ayuda sobre un comando especifico utiliza `{botPrefix}help` seguido del comando del que necesitas ayuda.",
-            IconUrl = "https://i.imgur.com/gUstNQ8.gif"
-        };
 
-        // Enviar el último EmbedBuilder si hay campos restantes
-        if (fieldsCount > 0)
-        {
-            await Context.Message.DeleteAsync();
-            await Context.User.SendMessageAsync(embed: builder.Build()).ConfigureAwait(false);
-            var reply = await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, la información de ayuda ha sido enviada a tu MD. Por favor, revisa tus mensajes directos.");
-            await Task.Delay(10000); // Delay de 10 segundos
-            await reply.DeleteAsync(); // Elimina el mensaje de respuesta del bot
-        }
-    }
+            var sortedModules = moduleList.OrderByDescending(x => x.Key.StartsWith("TradeModule")).ThenBy(x => x.Key).ToList();
 
+            var pages = new List<string>();
+            var currentPage = new StringBuilder();
+            var lineCount = 0;
 
-    [Command("help")]
-    [Summary("Muestra información sobre un comando específico.")]
-    public async Task HelpAsync([Summary("The command to get information for.")] string command)
-    {
-        // Verificar si el comando se está ejecutando en un MD
-        if (!(Context.Channel is IDMChannel))
-        {
-            var reply = await ReplyAsync($"<a:warning:1206483664939126795> Lo siento {Context.User.Mention}, este comando solo puede ser usado en el MD del bot.");
-
-            // Verificar si el contexto NO es un MD, y luego eliminar el mensaje del usuario
-            if (Context.Channel is IGuildChannel) // Verifica si es un canal dentro de un servidor
+            foreach (var module in sortedModules)
             {
-                await Context.Message.DeleteAsync(); // Elimina el mensaje del usuario
+                currentPage.AppendLine($"**{module.Key}**");
+                lineCount++;
+
+                foreach (var command in module.Value)
+                {
+                    currentPage.AppendLine($"`{command.Key}` - {command.Value}");
+                    lineCount++;
+
+                    if (lineCount >= 45)
+                    {
+                        pages.Add(currentPage.ToString());
+                        currentPage.Clear();
+                        lineCount = 0;
+                    }
+                }
+
+                if (lineCount > 0)
+                {
+                    currentPage.AppendLine();
+                    lineCount++;
+                }
             }
 
-            // Esperar 10 segundos antes de eliminar el mensaje de respuesta del bot
-            await Task.Delay(10000); // Delay de 10 segundos
-            await reply.DeleteAsync(); // Elimina el mensaje de respuesta del bot
+            if (currentPage.Length > 0)
+                pages.Add(currentPage.ToString());
 
-            return;
+            var pageCount = pages.Count;
+            if (page < 1 || page > pageCount)
+            {
+                await ReplyAsync($"Invalid page number. Please specify a number between 1 and {pageCount}.");
+                return;
+            }
+
+            var footerText = $"Page {page}/{pageCount}";
+            if (page < pageCount)
+                footerText += $" | Type `help {page + 1}` for the next page.";
+
+            var embedBuilder = new EmbedBuilder()
+                .WithTitle("Available Commands")
+                .WithColor(Color.Blue)
+                .WithDescription(pages[page - 1])
+                .WithFooter(footerText);
+
+            try
+            {
+                var dmChannel = await Context.User.CreateDMChannelAsync();
+                await dmChannel.SendMessageAsync(embed: embedBuilder.Build());
+                await ReplyAsync($"{Context.User.Mention}, I've sent you a DM with the help information!");
+            }
+            catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                await ReplyAsync($"{Context.User.Mention}, I couldn't send you a DM because you have DMs disabled. Please enable DMs and try again.");
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync($"An error occurred while sending the DM: {ex.Message}");
+            }
+
+            if (Context.Message is IUserMessage userMessage)
+                await userMessage.DeleteAsync().ConfigureAwait(false);
         }
 
-        var searchResult = _commandService.Search(Context, command);
-
-        if (!searchResult.IsSuccess)
+        [Command("help")]
+        [Summary("Shows information about a specific command.")]
+        public async Task HelpAsync([Summary("The command to get information for.")] string command)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Lo siento, no pude encontrar un comando como **{command}**.");
-            return;
-        }
+            var searchResult = _commandService.Search(Context, command);
 
-        var embedBuilder = new EmbedBuilder()
-            .WithTitle($"Ayuda para el comanod: {command}")
-            .WithColor(Color.Blue);
+            if (!searchResult.IsSuccess)
+            {
+                await ReplyAsync($"Sorry, I couldn't find a command like **{command}**.");
+                return;
+            }
 
-        foreach (var match in searchResult.Commands)
-        {
-            var cmd = match.Command;
+            var embedBuilder = new EmbedBuilder()
+                .WithTitle($"Help for {command}")
+                .WithColor(Color.Blue);
 
-            var parameters = cmd.Parameters.Select(p => $"`{p.Name}` - {p.Summary}");
-            var parameterSummary = string.Join("\n", parameters);
+            foreach (var match in searchResult.Commands)
+            {
+                var cmd = match.Command;
 
-            embedBuilder.AddField(cmd.Name, $"{cmd.Summary}\n\n**Parámetros:**\n{parameterSummary}", false);
-        }
+                var parameters = cmd.Parameters.Select(p => $"`{p.Name}` - {p.Summary}");
+                var parameterSummary = string.Join("\n", parameters);
 
-        try
-        {
-            var dmChannel = await Context.User.CreateDMChannelAsync();
-            await dmChannel.SendMessageAsync(embed: embedBuilder.Build());
-        }
-        catch (Exception ex)
-        {
-            await ReplyAsync($"<a:Error:1223766391958671454> Ocurrió un error: {ex.Message}");
+                embedBuilder.AddField(cmd.Name, $"{cmd.Summary}\n\n**Parameters:**\n{parameterSummary}", false);
+            }
+
+            try
+            {
+                var dmChannel = await Context.User.CreateDMChannelAsync();
+                await dmChannel.SendMessageAsync(embed: embedBuilder.Build());
+                await ReplyAsync($"{Context.User.Mention}, I've sent you a DM with the help information for the command **{command}**!");
+            }
+            catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                await ReplyAsync($"{Context.User.Mention}, I couldn't send you a DM because you have DMs disabled. Please enable DMs and try again.");
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync($"An error occurred while sending the DM: {ex.Message}");
+            }
+
+            if (Context.Message is IUserMessage userMessage)
+                await userMessage.DeleteAsync().ConfigureAwait(false);
         }
     }
 }

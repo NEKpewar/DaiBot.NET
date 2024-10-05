@@ -11,7 +11,7 @@ public static class EmbedHelper
     public static async Task SendNotificationEmbedAsync(IUser user, string message)
     {
         var embed = new EmbedBuilder()
-            .WithTitle("Aviso")
+            .WithTitle("Notice")
             .WithDescription(message)
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif")
@@ -24,8 +24,8 @@ public static class EmbedHelper
     public static async Task SendTradeCanceledEmbedAsync(IUser user, string reason)
     {
         var embed = new EmbedBuilder()
-            .WithTitle("Su trade fue cancelado...")
-            .WithDescription($"Su trade ha sido cancelado.\nInténtelo de nuevo. Si el problema persiste, reinicie su consola y compruebe su conexión a Internet:\n\n**Razón**: {reason}")
+            .WithTitle("Your Trade was Canceled...")
+            .WithDescription($"Your trade was canceled.\nPlease try again. If the issue persists, restart your switch and check your internet connection.\n\n**Reason**: {reason}")
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/dmerror.gif")
             .WithColor(Color.Red)
@@ -37,8 +37,8 @@ public static class EmbedHelper
     public static async Task SendTradeCodeEmbedAsync(IUser user, int code)
     {
         var embed = new EmbedBuilder()
-            .WithTitle("¡Agregado a la Cola!")
-            .WithDescription($"<a:yes:1206485105674166292> Te he añadido a la __lista__! Te enviaré un __mensaje__ aquí cuando comience tu operación...\n\n¡Aquí está tu código comercial!\n# {code:0000 0000}")
+            .WithTitle("Here's your trade code!")
+            .WithDescription($"# {code:0000 0000}")
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/tradecode.gif")
             .WithColor(Color.Blue)
@@ -47,16 +47,16 @@ public static class EmbedHelper
         await user.SendMessageAsync(embed: embed).ConfigureAwait(false);
     }
 
-    public static async Task SendTradeFinishedEmbedAsync<T>(IUser user, string message, T pk, bool isMysteryTrade, bool isMysteryEgg)
+    public static async Task SendTradeFinishedEmbedAsync<T>(IUser user, string message, T pk, bool isMysteryMon, bool isMysteryEgg)
         where T : PKM, new()
     {
         string thumbnailUrl;
 
         if (isMysteryEgg)
         {
-            thumbnailUrl = "https://i.imgur.com/RAj0syZ.png";
+            thumbnailUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/mysteryegg3.png";
         }
-        else if (isMysteryTrade)
+        else if (isMysteryMon)
         {
             thumbnailUrl = "https://i.imgur.com/FdESYAv.png";
         }
@@ -66,7 +66,7 @@ public static class EmbedHelper
         }
 
         var embed = new EmbedBuilder()
-            .WithTitle("Trade Completado!")
+            .WithTitle("Trade Completed!")
             .WithDescription(message)
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl(thumbnailUrl)
@@ -76,19 +76,19 @@ public static class EmbedHelper
         await user.SendMessageAsync(embed: embed).ConfigureAwait(false);
     }
 
-    public static async Task SendTradeInitializingEmbedAsync(IUser user, string speciesName, int code, bool isMysteryTrade, bool isMysteryEgg, string? message = null)
+    public static async Task SendTradeInitializingEmbedAsync(IUser user, string speciesName, int code, bool isMysteryMon, bool isMysteryEgg, string? message = null)
     {
         if (isMysteryEgg)
         {
-            speciesName = "**Huevo Misterioso**";
+            speciesName = "**Mystery Egg**";
         }
-        else if (isMysteryTrade)
+        else if (isMysteryMon)
         {
-            speciesName = "**Pokemon Misterioso**";
+            speciesName = "**Mystery Pokémon**";
         }
 
         var embed = new EmbedBuilder()
-            .WithTitle("Cargando el Pokeportal...")
+            .WithTitle("Loading the Trade Portal...")
             .WithDescription($"**Pokemon**: {speciesName}\n**Trade Code**: {code:0000 0000}")
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/initializing.gif")
@@ -106,8 +106,8 @@ public static class EmbedHelper
     public static async Task SendTradeSearchingEmbedAsync(IUser user, string trainerName, string inGameName, string? message = null)
     {
         var embed = new EmbedBuilder()
-            .WithTitle($"Buscando entrenador...")
-            .WithDescription($"**Esperando por**: {trainerName}\n**Mi IGN**: {inGameName}")
+            .WithTitle($"Now Searching for You, {trainerName}...")
+            .WithDescription($"**Waiting for**: {trainerName}\n**My IGN**: {inGameName}")
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/searching.gif")
             .WithColor(Color.Green);

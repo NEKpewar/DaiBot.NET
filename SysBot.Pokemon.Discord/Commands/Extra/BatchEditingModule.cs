@@ -12,18 +12,18 @@ namespace SysBot.Pokemon.Discord;
 public class BatchEditingModule : ModuleBase<SocketCommandContext>
 {
     [Command("batchInfo"), Alias("bei")]
-    [Summary("Intenta obtener información sobre la propiedad solicitada.")]
+    [Summary("Tries to get info about the requested property.")]
     public async Task GetBatchInfo(string propertyName)
     {
         var result = BatchEditing.GetPropertyType(propertyName);
         if (string.IsNullOrWhiteSpace(result))
-            await ReplyAsync($"<a:warning:1206483664939126795> No pude encuentra información sobre: {propertyName}.").ConfigureAwait(false);
+            await ReplyAsync($"Unable to find info for {propertyName}.").ConfigureAwait(false);
         else
             await ReplyAsync($"{propertyName}: {result}").ConfigureAwait(false);
     }
 
     [Command("batchValidate"), Alias("bev")]
-    [Summary("Intenta obtener información sobre la propiedad solicitada.")]
+    [Summary("Tries to get info about the requested property.")]
     public async Task ValidateBatchInfo(string instructions)
     {
         bool valid = IsValidInstructionSet(instructions, out var invalid);
@@ -31,12 +31,12 @@ public class BatchEditingModule : ModuleBase<SocketCommandContext>
         if (!valid)
         {
             var msg = invalid.Select(z => $"{z.PropertyName}, {z.PropertyValue}");
-            await ReplyAsync($"<a:warning:1206483664939126795> Líneas no válidas detectadas:\r\n{Format.Code(string.Join(Environment.NewLine, msg))}")
+            await ReplyAsync($"Invalid Lines Detected:\r\n{Format.Code(string.Join(Environment.NewLine, msg))}")
                 .ConfigureAwait(false);
         }
         else
         {
-            await ReplyAsync($"{invalid.Count} la(s) línea(s) no es(son) válida(s).").ConfigureAwait(false);
+            await ReplyAsync($"{invalid.Count} line(s) are invalid.").ConfigureAwait(false);
         }
     }
 

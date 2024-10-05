@@ -56,8 +56,7 @@ namespace SysBot.Pokemon.Discord
 
         [Command("specialrequestpokemon")]
         [Alias("srp")]
-        [Summary("Enumera los eventos de Wondercard disponibles de la generación o juego especificado o solicita un evento específico si se proporciona un número.")]
-        [RequireQueueRole(nameof(DiscordManager.RolesTrade))]
+        [Summary("Lists available wondercard events from the specified generation or game or requests a specific event if a number is provided.")]
         public async Task ListSpecialEventsAsync(string generationOrGame, [Remainder] string args = "")
         {
             var botPrefix = SysCord<T>.Runner.Config.Discord.CommandPrefix;
@@ -85,14 +84,15 @@ namespace SysBot.Pokemon.Discord
             var eventData = GetEventData(generationOrGame);
             if (eventData == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                await ReplyAsync($"Invalid generation or game: {generationOrGame}").ConfigureAwait(false);
                 return;
             }
 
             var allEvents = GetFilteredEvents(eventData, speciesName);
             if (!allEvents.Any())
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se han encontrado eventos para {generationOrGame} con el filtro especificado.").ConfigureAwait(false);
+                await ReplyAsync($"No events found for {generationOrGame} with the specified filter.").ConfigureAwait(false);
+                return;
             }
 
             var pageCount = (int)Math.Ceiling((double)allEvents.Count() / itemsPerPage);
@@ -104,43 +104,20 @@ namespace SysBot.Pokemon.Discord
 
         [Command("specialrequestpokemon")]
         [Alias("srp")]
-        [Summary("Descarga archivos adjuntos de eventos de Wondercard de la generación especificada y los agrega a la cola de transacciones.")]
+        [Summary("Downloads wondercard event attachments from the specified generation and adds to trade queue.")]
         [RequireQueueRole(nameof(DiscordManager.RolesTrade))]
         public async Task SpecialEventRequestAsync(string generationOrGame, [Remainder] string args = "")
         {
             if (!int.TryParse(args, out int index))
             {
-                await ReplyAsync("<a:warning:1206483664939126795> Índice de eventos no válido. Utilice un número de evento válido del comando").ConfigureAwait(false);
+                await ReplyAsync("Invalid event index. Please provide a valid event number.").ConfigureAwait(false);
                 return;
             }
 
             var userID = Context.User.Id;
             if (Info.IsUserInQueue(userID))
             {
-                var currentTime = DateTime.UtcNow;
-                var formattedTime = currentTime.ToString("hh:mm tt");
-
-                var queueEmbed = new EmbedBuilder
-                {
-                    Color = Color.Red,
-                    ImageUrl = "https://c.tenor.com/rDzirQgBPwcAAAAd/tenor.gif",
-                    ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-                };
-
-                queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
-
-                // Añadir un field al Embed para indicar el error
-                queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
-                queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
-                queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
-
-                queueEmbed.Footer = new EmbedFooterBuilder
-                {
-                    Text = $"{Context.User.Username} • {formattedTime}",
-                    IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-                };
-
-                await ReplyAsync(embed: queueEmbed.Build()).ConfigureAwait(false);
+                await ReplyAsync("You already have an existing trade in the queue. Please wait until it is processed.").ConfigureAwait(false);
                 return;
             }
 
@@ -149,14 +126,14 @@ namespace SysBot.Pokemon.Discord
                 var eventData = GetEventData(generationOrGame);
                 if (eventData == null)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                    await ReplyAsync($"Invalid generation or game: {generationOrGame}").ConfigureAwait(false);
                     return;
                 }
 
                 var entityEvents = eventData.Where(gift => gift.IsEntity && !gift.IsItem).ToArray();
                 if (index < 1 || index > entityEvents.Length)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Índice de eventos no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}`.").ConfigureAwait(false);
+                    await ReplyAsync($"Invalid event index. Please use a valid event number from the `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}` command.").ConfigureAwait(false);
                     return;
                 }
 
@@ -164,7 +141,7 @@ namespace SysBot.Pokemon.Discord
                 var pk = ConvertEventToPKM(selectedEvent);
                 if (pk == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
+                    await ReplyAsync("Wondercard data provided is not compatible with this module!").ConfigureAwait(false);
                     return;
                 }
 
@@ -176,7 +153,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:Error:1223766391958671454> Ocurrió un error: {ex.Message}").ConfigureAwait(false);
+                await ReplyAsync($"An error occurred: {ex.Message}").ConfigureAwait(false);
             }
             finally
             {
@@ -228,13 +205,13 @@ namespace SysBot.Pokemon.Discord
         private static EmbedBuilder BuildEventListEmbed(string generationOrGame, IEnumerable<(int Index, string EventInfo)> allEvents, int page, int pageCount, string botPrefix)
         {
             var embed = new EmbedBuilder()
-                .WithTitle($"📝 Eventos Disponibles - {generationOrGame.ToUpperInvariant()}")
-                .WithDescription($"Pagina {page} de {pageCount}")
+                .WithTitle($"Available Events - {generationOrGame.ToUpperInvariant()}")
+                .WithDescription($"Page {page} of {pageCount}")
                 .WithColor(DiscordColor.Blue);
 
             foreach (var item in allEvents.Skip((page - 1) * itemsPerPage).Take(itemsPerPage))
             {
-                embed.AddField($"{item.Index}. {item.EventInfo}", $"Usa `{botPrefix}srp {generationOrGame} {item.Index}` en el canal correspondiente para solicitar este evento.");
+                embed.AddField($"{item.Index}. {item.EventInfo}", $"Use `{botPrefix}srp {generationOrGame} {item.Index}` to request this event.");
             }
 
             return embed;
@@ -244,7 +221,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (Context.User is not IUser user)
             {
-                await ReplyAsync("<a:Error:1223766391958671454> **Error**: No se puede enviar un DM. Por favor verifique su **Configuración de Privacidad del Servidor**.");
+                await ReplyAsync("**Error**: Unable to send a DM. Please check your **Server Privacy Settings**.");
                 return;
             }
 
@@ -252,11 +229,11 @@ namespace SysBot.Pokemon.Discord
             {
                 var dmChannel = await user.CreateDMChannelAsync();
                 await dmChannel.SendMessageAsync(embed: embed.Build());
-                await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, Te envié un DM con la lista de eventos.");
+                await ReplyAsync($"{Context.User.Mention}, I've sent you a DM with the list of events.");
             }
             catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
+                await ReplyAsync($"{Context.User.Mention}, I'm unable to send you a DM. Please check your **Server Privacy Settings**.");
             }
         }
 
@@ -358,48 +335,52 @@ namespace SysBot.Pokemon.Discord
 
         [Command("geteventpokemon")]
         [Alias("gep")]
-        [Summary("Descarga el evento solicitado como un archivo pk y lo envía al usuario.")]
+        [Summary("Downloads the requested event as a pk file and sends it to the user.")]
         public async Task GetEventPokemonAsync(string generationOrGame, [Remainder] string args = "")
         {
             if (!int.TryParse(args, out int index))
             {
-                await ReplyAsync("<a:warning:1206483664939126795> Índice de evento no válido. Proporcione un número de evento válido.").ConfigureAwait(false);
+                await ReplyAsync("Invalid event index. Please provide a valid event number.").ConfigureAwait(false);
                 return;
             }
+
             try
             {
                 var eventData = GetEventData(generationOrGame);
                 if (eventData == null)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                    await ReplyAsync($"Invalid generation or game: {generationOrGame}").ConfigureAwait(false);
                     return;
                 }
+
                 var entityEvents = eventData.Where(gift => gift.IsEntity && !gift.IsItem).ToArray();
                 if (index < 1 || index > entityEvents.Length)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Índice de evento no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}`.").ConfigureAwait(false);
+                    await ReplyAsync($"Invalid event index. Please use a valid event number from the `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}` command.").ConfigureAwait(false);
                     return;
                 }
+
                 var selectedEvent = entityEvents[index - 1];
                 var pk = ConvertEventToPKM(selectedEvent);
                 if (pk == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
+                    await ReplyAsync("Wondercard data provided is not compatible with this module!").ConfigureAwait(false);
                     return;
                 }
+
                 try
                 {
                     await Context.User.SendPKMAsync(pk);
-                    await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, Te he enviado el archivo PK por DM.");
+                    await ReplyAsync($"{Context.User.Mention}, I've sent you the PK file via DM.");
                 }
                 catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, No puedo enviarte un mensaje directo. Revisa la **Configuración de privacidad del servidor**.");
+                    await ReplyAsync($"{Context.User.Mention}, I'm unable to send you a DM. Please check your **Server Privacy Settings**.");
                 }
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Se produjo un error: {ex.Message}").ConfigureAwait(false);
+                await ReplyAsync($"An error occurred: {ex.Message}").ConfigureAwait(false);
             }
             finally
             {
@@ -407,37 +388,18 @@ namespace SysBot.Pokemon.Discord
             }
         }
 
-        private async Task AddTradeToQueueAsync(int code, string trainerName, T? pk, RequestSignificance sig, SocketUser usr, bool isBatchTrade = false, int batchTradeNumber = 1, int totalBatchTrades = 1, bool isMysteryTrade = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, PokeTradeType tradeType = PokeTradeType.Specific, bool ignoreAutoOT = false, bool isHiddenTrade = false)
+        private async Task AddTradeToQueueAsync(int code, string trainerName, T? pk, RequestSignificance sig, SocketUser usr, bool isBatchTrade = false, int batchTradeNumber = 1, int totalBatchTrades = 1, bool isMysteryMon = false, bool isMysteryEgg = false, List<Pictocodes>? lgcode = null, PokeTradeType tradeType = PokeTradeType.Specific, bool ignoreAutoOT = false, bool isHiddenTrade = false)
         {
             lgcode ??= TradeModule<T>.GenerateRandomPictocodes(3);
 #pragma warning disable CS8604 // Possible null reference argument.
             var la = new LegalityAnalysis(pk);
 #pragma warning restore CS8604 // Possible null reference argument.
-            if(!la.Valid)
+            if (!la.Valid)
             {
-                var customIconUrl = "https://img.freepik.com/free-icon/warning_318-478601.jpg"; // Custom icon URL for the embed title
-                var customImageUrl = "https://usagif.com/wp-content/uploads/gify/37-pikachu-usagif.gif"; // Custom image URL for the embed
-                var customthumbnail = "https://i.imgur.com/DWLEXyu.png";
-                string legalityReport = la.Report(verbose: false);
-
-                string responseMessage = pk.IsEgg ? $"<a:no:1206485104424128593> {usr.Mention} El conjunto de showdown __no es válido__ para este **huevo**. Por favor revisa tu __información__ y vuelve a intentarlo." :
-                    $"<a:no:1206485104424128593> {usr.Mention} el archivo **{typeof(T).Name}** no es __legal__ y no puede ser tradeado.\n### He aquí la razón:\n```{legalityReport}```\n```🔊Consejo:\n• Por favor verifica detenidamente la informacion en PKHeX e intentalo de nuevo!\n• Puedes utilizar el plugin de ALM para legalizar tus pokemons y ahorrarte estos problemas.```";
-                var embedResponse = new EmbedBuilder()
-                    .WithAuthor("Error al intentar agregarte a la cola.", customIconUrl)
-                    .WithDescription(responseMessage)
-                    .WithColor(Color.Red)
-                    .WithImageUrl(customImageUrl)
-                        .WithThumbnailUrl(customthumbnail);
-
-                // Adding footer with user avatar, username, and current time in 12-hour format
-                var footerBuilder1 = new EmbedFooterBuilder()
-                    .WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
-                    .WithText($"{Context.User.Username} | {DateTimeOffset.Now.ToString("hh:mm tt")}"); // "hh:mm tt" formats time in 12-hour format with AM/PM
-
-                var embed2 = embedResponse.Build();
-
-                var reply = await ReplyAsync(embed: embed2).ConfigureAwait(false);
-                await Task.Delay(10000);
+                string responseMessage = pk.IsEgg ? "Invalid Showdown Set for this Egg. Please review your information and try again." :
+                    $"{typeof(T).Name} attachment is not legal, and cannot be traded!";
+                var reply = await ReplyAsync(responseMessage).ConfigureAwait(false);
+                await Task.Delay(6000);
                 await reply.DeleteAsync().ConfigureAwait(false);
                 return;
             }
@@ -458,7 +420,7 @@ namespace SysBot.Pokemon.Discord
                 if (la.Valid) pk = clone;
             }
 
-            await QueueHelper<T>.AddToQueueAsync(Context, code, trainerName, sig, pk, PokeRoutineType.LinkTrade, tradeType, usr, isBatchTrade, batchTradeNumber, totalBatchTrades, isHiddenTrade, isMysteryTrade, isMysteryEgg, lgcode, ignoreAutoOT).ConfigureAwait(false);
+            await QueueHelper<T>.AddToQueueAsync(Context, code, trainerName, sig, pk, PokeRoutineType.LinkTrade, tradeType, usr, isBatchTrade, batchTradeNumber, totalBatchTrades, isHiddenTrade, isMysteryMon, isMysteryEgg, lgcode, ignoreAutoOT).ConfigureAwait(false);
         }
     }
 }

@@ -19,7 +19,7 @@ public static class ReusableActions
     {
         // Announce it in the channel the command was entered only if it's not already an echo channel.
         EchoUtil.Echo(msg);
-        if (!EchoModule.IsEchoChannel(channel))
+        if (!EchoModule.IsEchoChannel(channel) && !EchoModule.IsAbuseEchoChannel(channel))
             await channel.SendMessageAsync(msg).ConfigureAwait(false);
     }
 
@@ -43,7 +43,7 @@ public static class ReusableActions
             newShowdown.Add(line);
 
         if (pkm.IsEgg)
-            newShowdown.Add("\nEl Pokémon es un huevo");
+            newShowdown.Add("\nPokémon is an egg");
         if (pkm.Ball > (int)Ball.None)
             newShowdown.Insert(newShowdown.FindIndex(z => z.Contains("Nature")), $"Ball: {(Ball)pkm.Ball} Ball");
         if (pkm.IsShiny)
@@ -90,7 +90,7 @@ public static class ReusableActions
             .Build();
 
         var botMessage = await channel.SendMessageAsync(embed: embed).ConfigureAwait(false); // Send the embed
-        var warningMessage = await channel.SendMessageAsync("<a:loading:1210133423050719283> Este mensaje se autodestruirá en 15 segundos. Por favor copie sus datos.").ConfigureAwait(false);
+        var warningMessage = await channel.SendMessageAsync("This message will self-destruct in 15 seconds. Please copy your data.").ConfigureAwait(false);
 
         _ = Task.Run(async () =>
         {

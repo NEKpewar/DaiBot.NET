@@ -105,16 +105,15 @@ namespace SysBot.Pokemon.Discord
         // Adjusted command method to use the new selection logic with Pokémon name filtering
         [Command("randomteam")]
         [Alias("rt", "RandomTeam", "Rt")]
-        [Summary("Genera un equipo VGC aleatorio a partir de la hoja de cálculo de Google especificada y lo envía como archivos a través de DM.")]
-        [RequireQueueRole(nameof(DiscordManager.RolesTrade))]
+        [Summary("Generates a random VGC team from the specified Google Spreadsheet and sends it as files via DM.")]
         public async Task GenerateSpreadsheetTeamAsync(string? pokemonName = null)
         {
             if (!SysCord<T>.Runner.Config.Trade.VGCPastesConfiguration.AllowRequests)
             {
-                await ReplyAsync($"<a:no:1206485104424128593> {Context.User.Mention} Este módulo está actualmente deshabilitado.").ConfigureAwait(false);
+                await ReplyAsync("This module is currently disabled.").ConfigureAwait(false);
                 return;
             }
-            var generatingMessage = await ReplyAsync($"<a:loading:1210133423050719283> {Context.User.Mention} Generando y enviando tu equipo VGC desde VGCPastes. Espere por favor...");
+            var generatingMessage = await ReplyAsync("Generating and sending your VGC team from VGCPastes. Please wait...");
 
             try
             {
@@ -124,7 +123,7 @@ namespace SysBot.Pokemon.Discord
                 var (PokePasteUrl, selectedRow) = VGCPastes<T>.SelectRandomPokePasteUrl(spreadsheetData, pokemonName);
                 if (PokePasteUrl == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> No se pudo encontrar una URL de Poke Paste válida con el Pokémon especificado.");
+                    await ReplyAsync("Failed to find a valid PokePaste URL with the specified Pokémon.");
                     return;
                 }
 
@@ -142,7 +141,7 @@ namespace SysBot.Pokemon.Discord
 
                 if (showdownSets.Count == 0)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {PokePasteUrl}");
+                    await ReplyAsync($"No valid showdown sets found in the pokepaste URL: {PokePasteUrl}");
                     return;
                 }
 
@@ -167,11 +166,11 @@ namespace SysBot.Pokemon.Discord
 
                             if (pkm is not PK9 pk || !new LegalityAnalysis(pkm).Valid)
                             {
-                                var reason = result == "Timeout" ? $"<a:warning:1206483664939126795> Ese conjunto {GameInfo.Strings.Species[template.Species]} tardó demasiado en generarse." :
-                                             result == "Failed" ? $"<a:warning:1206483664939126795> No he podido crear un {GameInfo.Strings.Species[template.Species]} a partir de ese conjunto." :
-                                             "<a:Error:1223766391958671454> Un error desconocido ocurrió.";
+                                var reason = result == "Timeout" ? $"That {GameInfo.Strings.Species[template.Species]} set took too long to generate." :
+                                             result == "Failed" ? $"I wasn't able to create a {GameInfo.Strings.Species[template.Species]} from that set." :
+                                             "An unknown error occurred.";
 
-                                await ReplyAsync($"<a:warning:1206483664939126795> Fallo al crear {GameInfo.Strings.Species[template.Species]}: {reason}");
+                                await ReplyAsync($"Failed to create {GameInfo.Strings.Species[template.Species]}: {reason}");
                                 continue;
                             }
 
@@ -192,7 +191,7 @@ namespace SysBot.Pokemon.Discord
                         catch (Exception ex)
                         {
                             var speciesName = GameInfo.GetStrings("en").Species[set.Species];
-                            await ReplyAsync($"<a:warning:1206483664939126795> Se produjo un error durante el procesamiento de {speciesName}: {ex.Message}");
+                            await ReplyAsync($"An error occurred while processing {speciesName}: {ex.Message}");
                         }
                     }
                 }
@@ -222,17 +221,17 @@ namespace SysBot.Pokemon.Discord
                             author =>
                             {
                                 author
-                                    .WithName($"Equipo generado para {Context.User.Username}")
+                                    .WithName($"{Context.User.Username}'s Generated Team")
                                     .WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl());
                             })
-                        .WithTitle($"Equipo: {teamDescription}")
-                        .AddField("__**Nombre del entrenador**__:", trainerName, true)
-                        .AddField("__**Fecha compartida**__:", dateShared, true)
+                        .WithTitle($"Team: {teamDescription}")
                         .WithDescription(
-                                $"{(rentalCode != "Ninguno" ? $"**Código de alquiler:** `{rentalCode}`" : "")}"
+                                $"**Trainer Name:** {trainerName}\n" +
+                                $"**Date Shared:** {dateShared}\n" +
+                                $"{(rentalCode != "None" ? $"**Rental Code:** `{rentalCode}`" : "")}"
                             )
-                        .WithImageUrl($"attachment://spreadsheetteam.png")
-                        .WithFooter($"Equipo Legalizado Enviado al MD de {Context.User.Username}")
+                        .WithImageUrl("attachment://spreadsheetteam.png")
+                        .WithFooter($"Legalized Team Sent to {Context.User.Username}'s Inbox")
                         .WithCurrentTimestamp();
 
                     var embed = embedBuilder.Build();
@@ -251,7 +250,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} Error al generar el equipo VGC desde la hoja de cálculo: {ex.Message}");
+                await ReplyAsync($"Error generating VGC team from spreadsheet: {ex.Message}");
             }
         }
 

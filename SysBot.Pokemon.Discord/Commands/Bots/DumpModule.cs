@@ -3,18 +3,17 @@ using Discord.Net;
 using Discord.Commands;
 using PKHeX.Core;
 using System.Threading.Tasks;
-using System;
 
 namespace SysBot.Pokemon.Discord;
 
-[Summary("Pone en cola nuevas operaciones de dump")]
+[Summary("Queues new Dump trades")]
 public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new()
 {
     private static TradeQueueInfo<T> Info => SysCord<T>.Runner.Hub.Queues.Info;
 
     [Command("dump")]
     [Alias("d")]
-    [Summary("Dump los Pokémon que muestras a través de Link Trade.")]
+    [Summary("Dumps the Pokémon you show via Link Trade.")]
     [RequireQueueRole(nameof(DiscordManager.RolesDump))]
     public async Task DumpAsync(int code)
     {
@@ -43,7 +42,7 @@ public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
 
     [Command("dump")]
     [Alias("d")]
-    [Summary("Dump los Pokémon que muestras a través de Link Trade.")]
+    [Summary("Dumps the Pokémon you show via Link Trade.")]
     [RequireQueueRole(nameof(DiscordManager.RolesDump))]
     public async Task DumpAsync([Summary("Trade Code")][Remainder] string code)
     {
@@ -57,7 +56,7 @@ public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
 
     [Command("dump")]
     [Alias("d")]
-    [Summary("Dump los Pokémon que muestras a través de Link Trade.")]
+    [Summary("Dumps the Pokémon you show via Link Trade.")]
     [RequireQueueRole(nameof(DiscordManager.RolesDump))]
     public async Task DumpAsync()
     {
@@ -70,7 +69,7 @@ public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
 
     [Command("dumpList")]
     [Alias("dl", "dq")]
-    [Summary("Imprime los usuarios en la cola de Dump.")]
+    [Summary("Prints the users in the Dump queue.")]
     [RequireSudo]
     public async Task GetListAsync()
     {
@@ -78,11 +77,11 @@ public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
         var embed = new EmbedBuilder();
         embed.AddField(x =>
         {
-            x.Name = "Tradeos pendientes";
+            x.Name = "Pending Trades";
             x.Value = msg;
             x.IsInline = false;
         });
-        await ReplyAsync("📝 Estos son los usuarios que están esperando actualmente:", embed: embed.Build()).ConfigureAwait(false);
+        await ReplyAsync("These are the users who are currently waiting:", embed: embed.Build()).ConfigureAwait(false);
     }
 
     private async Task<bool> CheckUserInQueueAsync()
@@ -90,30 +89,7 @@ public class DumpModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
         var userID = Context.User.Id;
         if (Info.IsUserInQueue(userID))
         {
-            var currentTime = DateTime.UtcNow;
-            var formattedTime = currentTime.ToString("hh:mm tt");
-
-            var queueEmbed = new EmbedBuilder
-            {
-                Color = Color.Red,
-                ImageUrl = "https://c.tenor.com/rDzirQgBPwcAAAAd/tenor.gif",
-                ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-            };
-
-            queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
-
-            // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
-            queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
-            queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
-
-            queueEmbed.Footer = new EmbedFooterBuilder
-            {
-                Text = $"{Context.User.Username} • {formattedTime}",
-                IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-            };
-
-            await ReplyAsync(embed: queueEmbed.Build()).ConfigureAwait(false);
+            await ReplyAsync("You already have an existing trade in the queue. Please wait until it is processed.").ConfigureAwait(false);
             return true;
         }
         return false;

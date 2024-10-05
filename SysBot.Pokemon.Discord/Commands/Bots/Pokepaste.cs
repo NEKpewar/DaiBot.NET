@@ -52,10 +52,10 @@ namespace SysBot.Pokemon.Discord
 
         [Command("pokepaste")]
         [Alias("pp", "Pokepaste", "PP")]
-        [Summary("Genera un equipo a partir de una URL de pokepaste especificada y lo envía como archivos a través de DM.")]
+        [Summary("Generates a team from a specified pokepaste URL and sends it as files via DM.")]
         public async Task GenerateTeamFromUrlAsync(string pokePasteUrl)
         {
-            var generatingMessage = await ReplyAsync("<a:loading:1210133423050719283> {Context.User.Mention} Generando y enviando tu equipo de Pokepaste. Espere por favor...");
+            var generatingMessage = await ReplyAsync("Generating and sending your Pokepaste team. Please wait...");
             try
             {
                 await Task.Run(async () =>
@@ -74,7 +74,7 @@ namespace SysBot.Pokemon.Discord
 
                     if (showdownSets.Count == 0)
                     {
-                        await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {pokePasteUrl}", 10, generatingMessage).ConfigureAwait(false);
+                        await ReplyAndDeleteAsync($"No valid showdown sets found in the pokepaste URL: {pokePasteUrl}", 10, generatingMessage).ConfigureAwait(false);
                         return;
                     }
 
@@ -103,14 +103,14 @@ namespace SysBot.Pokemon.Discord
                                     }
                                     catch (OperationCanceledException)
                                     {
-                                        await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Se produjo un tiempo de espera durante la generación {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
+                                        await ReplyAndDeleteAsync($"Timeout occurred while generating {GameInfo.Strings.Species[template.Species]}. Skipping...", 10, generatingMessage).ConfigureAwait(false);
                                         continue;
                                     }
                                 }
 
                                 if (pk == null || !new LegalityAnalysis(pk).Valid)
                                 {
-                                    await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Fallo al crear {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
+                                    await ReplyAndDeleteAsync($"Failed to create {GameInfo.Strings.Species[template.Species]}. Skipping...", 10, generatingMessage).ConfigureAwait(false);
                                     continue;
                                 }
 
@@ -131,7 +131,7 @@ namespace SysBot.Pokemon.Discord
                             catch (Exception ex)
                             {
                                 var speciesName = GameInfo.GetStrings("en").Species[set.Species];
-                                await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Se produjo un error durante el procesamiento. {speciesName}: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
+                                await ReplyAndDeleteAsync($"An error occurred while processing {speciesName}: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
                             }
                         }
                     }
@@ -141,7 +141,7 @@ namespace SysBot.Pokemon.Discord
                     memoryStream.Position = 0;
 
                     // Send the ZIP file to the user's DM
-                    await Context.User.SendFileAsync(memoryStream, $"{title}.zip", text: "Aquí está tu equipo!").ConfigureAwait(false);
+                    await Context.User.SendFileAsync(memoryStream, $"{title}.zip", text: "Here's your team!").ConfigureAwait(false);
 
                     // Save the combined image as a file
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -161,11 +161,11 @@ namespace SysBot.Pokemon.Discord
                                 author =>
                                 {
                                     author
-                                        .WithName($"Equipo generado para {Context.User.Username}")
+                                        .WithName($"{Context.User.Username}'s Generated Team")
                                         .WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl());
                                 })
                             .WithImageUrl($"attachment://{title}.png")
-                            .WithFooter($"Equipo Legalizado y Enviado al MD de {Context.User.Username}")
+                            .WithFooter($"Legalized Team Sent to {Context.User.Username}'s Inbox")
                             .WithCurrentTimestamp();
 
                         var embed = embedBuilder.Build();
@@ -182,7 +182,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAndDeleteAsync($"<a:Error:1223766391958671454> Error al generar el equipo de Pokepaste: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
+                await ReplyAndDeleteAsync($"Error generating Pokepaste team: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
             }
         }
 

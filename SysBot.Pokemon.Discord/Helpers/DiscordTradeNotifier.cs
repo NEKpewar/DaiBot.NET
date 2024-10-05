@@ -30,9 +30,9 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
 
     private bool IsMysteryEgg { get; }
 
-    private bool IsMysteryTrade { get; }
+    private bool IsMysteryMon { get; }
 
-    public DiscordTradeNotifier(T data, PokeTradeTrainerInfo info, int code, SocketUser trader, int batchTradeNumber, int totalBatchTrades, bool isMysteryTrade, bool isMysteryEgg, List<Pictocodes> lgcode)
+    public DiscordTradeNotifier(T data, PokeTradeTrainerInfo info, int code, SocketUser trader, int batchTradeNumber, int totalBatchTrades, bool isMysteryMon, bool isMysteryEgg, List<Pictocodes> lgcode)
     {
         Data = data;
         Info = info;
@@ -41,7 +41,7 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         BatchTradeNumber = batchTradeNumber;
         TotalBatchTrades = totalBatchTrades;
         IsMysteryEgg = isMysteryEgg;
-        IsMysteryTrade = isMysteryTrade;
+        IsMysteryMon = isMysteryMon;
         LGCode = lgcode;
     }
 
@@ -54,40 +54,39 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         int language = 2;
         var speciesName = SpeciesName.GetSpeciesName(Data.Species, language);
         var batchInfo = TotalBatchTrades > 1 ? $" (Trade {BatchTradeNumber} of {TotalBatchTrades})" : "";
-        // Modificación para cambiar el nombre del Pokémon si es un trade misterioso
-        var receive = IsMysteryTrade ? " (Pokemon Misterioso)" : (Data.Species == 0 ? string.Empty : $" ({Data.Nickname})");
+        var receive = IsMysteryMon ? " (Mystery Pokémon)" : (Data.Species == 0 ? string.Empty : $" ({Data.Nickname})");
 
         if (Data is PK9)
         {
-            var message = $"Inicializando el comercio**{receive}{batchInfo}**. Por favor prepárate.";
+            var message = $"Initializing trade{receive}{batchInfo}. Please be ready.";
 
             if (TotalBatchTrades > 1 && BatchTradeNumber == 1)
             {
-                message += "\n**Permanezca en el intercambio hasta que se completen todos los intercambios por lotes.**";
+                message += "\n**Please stay in the trade until all batch trades are completed.**";
             }
 
-            EmbedHelper.SendTradeInitializingEmbedAsync(Trader, speciesName, Code, IsMysteryTrade, IsMysteryEgg, message).ConfigureAwait(false);
+            EmbedHelper.SendTradeInitializingEmbedAsync(Trader, speciesName, Code, IsMysteryMon, IsMysteryEgg, message).ConfigureAwait(false);
         }
         else if (Data is PB7)
         {
             var (thefile, lgcodeembed) = CreateLGLinkCodeSpriteEmbed(LGCode);
-            Trader.SendFileAsync(thefile, $"Inicializando el comercio**{receive}**. Por favor prepárate. Tu código es:", embed: lgcodeembed).ConfigureAwait(false);
+            Trader.SendFileAsync(thefile, $"Initializing trade{receive}. Please be ready. Your code is", embed: lgcodeembed).ConfigureAwait(false);
         }
         else
         {
-            EmbedHelper.SendTradeInitializingEmbedAsync(Trader, speciesName, Code, IsMysteryTrade, IsMysteryEgg).ConfigureAwait(false);
+            EmbedHelper.SendTradeInitializingEmbedAsync(Trader, speciesName, Code, IsMysteryMon, IsMysteryEgg).ConfigureAwait(false);
         }
     }
 
     public void TradeSearching(PokeRoutineExecutor<T> routine, PokeTradeDetail<T> info)
     {
-        var batchInfo = TotalBatchTrades > 1 ? $" para la operación por lotes (Trade {BatchTradeNumber} de {TotalBatchTrades})" : "";
+        var batchInfo = TotalBatchTrades > 1 ? $" for batch trade (Trade {BatchTradeNumber} of {TotalBatchTrades})" : "";
         var name = Info.TrainerName;
         var trainer = string.IsNullOrEmpty(name) ? string.Empty : $" {name}";
 
         if (Data is PB7 && LGCode != null && LGCode.Count != 0)
         {
-            var message = $"Estoy esperando por ti,**{trainer}{batchInfo}**! __Tienes **40 segundos**__. Mi IGN es **{routine.InGameName}**.";
+            var message = $"I'm waiting for you{trainer}{batchInfo}! My IGN is **{routine.InGameName}**.";
             Trader.SendMessageAsync(message).ConfigureAwait(false);
         }
         else
@@ -96,7 +95,7 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
             if (TotalBatchTrades > 1 && BatchTradeNumber > 1)
             {
                 var receive = Data.Species == 0 ? string.Empty : $" ({Data.Nickname})";
-                additionalMessage = $"Ahora intercambiando{receive} (Intercambio {BatchTradeNumber} de {TotalBatchTrades}). **Selecciona el Pokémon que deseas intercambiar!**";
+                additionalMessage = $"Now trading{receive} (Trade {BatchTradeNumber} of {TotalBatchTrades}). **Select the Pokémon you wish to trade!**";
             }
 
             EmbedHelper.SendTradeSearchingEmbedAsync(Trader, trainer, routine.InGameName, additionalMessage).ConfigureAwait(false);
@@ -113,11 +112,10 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
     {
         OnFinish?.Invoke(routine);
         var tradedToUser = Data.Species;
-        var message = tradedToUser != 0 ? (info.IsMysteryTrade ? "<a:yes:1206485105674166292> Trade finalizado. ¡Has recibido un **Pokemon Misterioso**!" : (info.IsMysteryEgg ? "<a:yes:1206485105674166292> Trade finalizado. ¡Disfruta de tu **Huevo Misterioso**!" : $"<a:yes:1206485105674166292> Trade finalizado. Disfruta de tu **{(Species)tradedToUser}**!")) : "<a:yes:1206485105674166292> Trade finalizado!";
-
-        EmbedHelper.SendTradeFinishedEmbedAsync(Trader, message, Data, info.IsMysteryTrade, info.IsMysteryEgg).ConfigureAwait(false);
+        var message = tradedToUser != 0 ? (info.IsMysteryMon ? "Enjoy your **Mystery Pokémon**!" : info.IsMysteryEgg ? "Enjoy your **Mystery Egg**!" : $"Enjoy your **{(Species)tradedToUser}**!") : "Trade finished!";
+        EmbedHelper.SendTradeFinishedEmbedAsync(Trader, message, Data, info.IsMysteryMon, info.IsMysteryEgg).ConfigureAwait(false);
         if (result.Species != 0 && Hub.Config.Discord.ReturnPKMs)
-            Trader.SendPKMAsync(result, "▼ Aqui esta lo que me enviaste! ▼").ConfigureAwait(false);
+            Trader.SendPKMAsync(result, "Here's what you traded me!").ConfigureAwait(false);
     }
 
     public void SendNotification(PokeRoutineExecutor<T> routine, PokeTradeDetail<T> info, string message)
@@ -152,11 +150,11 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         var embed = new EmbedBuilder { Color = Color.LighterGrey };
         embed.AddField(x =>
         {
-            x.Name = $"Semilla: {r.Seed:X16}";
+            x.Name = $"Seed: {r.Seed:X16}";
             x.Value = lines;
             x.IsInline = false;
         });
-        var msg = $"Aquí están los detalles para `{r.Seed:X16}`:";
+        var msg = $"Here are the details for `{r.Seed:X16}`:";
         Trader.SendMessageAsync(msg, embed: embed.Build()).ConfigureAwait(false);
     }
 

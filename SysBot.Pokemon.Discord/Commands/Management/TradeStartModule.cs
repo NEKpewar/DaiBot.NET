@@ -53,7 +53,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
     }
 
     [Command("startHere")]
-    [Summary("Hace que el bot registre el comercio en el canal.")]
+    [Summary("Makes the bot log trade starts to the channel.")]
     [RequireSudo]
     public async Task AddLogAsync()
     {
@@ -61,7 +61,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
         var cid = c.Id;
         if (Channels.TryGetValue(cid, out _))
         {
-            await ReplyAsync("<a:warning:1206483664939126795> Ya se está registrando aquí.").ConfigureAwait(false);
+            await ReplyAsync("Already logging here.").ConfigureAwait(false);
             return;
         }
 
@@ -69,7 +69,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
 
         // Add to discord global loggers (saves on program close)
         SysCordSettings.Settings.TradeStartingChannels.AddIfNew([GetReference(Context.Channel)]);
-        await ReplyAsync("<a:yes:1206485105674166292> ¡Añadida salida de Notificación de Inicio a este canal!").ConfigureAwait(false);
+        await ReplyAsync("Added Start Notification output to this channel!").ConfigureAwait(false);
     }
 
     private static void AddLogChannel(ISocketMessageChannel c, ulong cid)
@@ -81,7 +81,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var user = _discordClient.GetUser(detail.Trainer.ID);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            if (user == null) { Console.WriteLine($"<a:warning:1206483664939126795> Usuario no encontrado para ID {detail.Trainer.ID}."); return; }
+            if (user == null) { Console.WriteLine($"User not found for ID {detail.Trainer.ID}."); return; }
 
             string speciesName = detail.TradeData != null ? GameInfo.Strings.Species[detail.TradeData.Species] : "";
             string ballImgUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/36e891cc02fe283cd70d9fc8fef2f3c490096d6c/imgs/difficulty.png";
@@ -94,57 +94,35 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
                 ballImgUrl = $"https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/28x28/{ballName}.png";
             }
 
-#pragma warning disable CS8604 // Possible null reference argument.
-            var embedData = DetailsExtractor<T>.ExtractPokemonDetails(detail.TradeData, user, detail.IsMysteryTrade, detail.IsMysteryEgg, false, false, false, false, false, 0, 0, detail.Type);
-#pragma warning restore CS8604 // Possible null reference argument.
-
-            // Configura el título y la imagen de acuerdo al tipo de comercio
-            string? tradeTitle;
-            string embedImageUrl;
-
-            if (detail.Type == PokeTradeType.Item)
+            string tradeTitle = detail.IsMysteryMon ? "✨ Mystery Pokémon" : detail.IsMysteryEgg ? "✨ Mystery Egg" : detail.Type switch
             {
-                tradeTitle = embedData.HeldItem; // Nombre del item como título
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                string heldItemName = embedData.HeldItem.ToLower().Replace(" ", "");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                embedImageUrl = $"https://serebii.net/itemdex/sprites/sv/{heldItemName}.png";
-                ballImgUrl = TradeExtensions<T>.PokeImg(detail.TradeData, false, true);
-            }
-            else
+                PokeTradeType.Clone => "Cloned Pokémon",
+                PokeTradeType.Dump => "Pokémon Dump",
+                PokeTradeType.FixOT => "Cloned Pokémon (Fixing OT Info)",
+                PokeTradeType.Seed => "Cloned Pokémon (Special Request)",
+                _ => speciesName
+            };
+
+            string embedImageUrl = detail.IsMysteryMon ? "https://i.imgur.com/FdESYAv.png" : detail.IsMysteryEgg ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/mysteryegg3.png" : detail.Type switch
             {
-                // Comportamiento existente para otros tipos de comercio
-                tradeTitle = detail.IsMysteryTrade ? "🎭 Pokemon Misterioso 🎭" : detail.IsMysteryEgg ? "✨ Huevo misterioso Shiny ✨" : detail.Type switch
-                {
-                    PokeTradeType.Clone => "Solicitud de Clonación",
-                    PokeTradeType.Dump => "Solicitud de Dump",
-                    PokeTradeType.FixOT => "Solicitud de FixOT",
-                    PokeTradeType.Seed => "Solicitud Especial",
-                    _ => GameInfo.Strings.Species[detail.TradeData.Species]
-                };
-                embedImageUrl = detail.IsMysteryTrade ? "https://i.imgur.com/FdESYAv.png" : detail.IsMysteryEgg ? "https://i.imgur.com/RAj0syZ.png" : detail.Type switch
-                {
-                    PokeTradeType.Clone => "https://i.imgur.com/aSTCjUn.png",
-                    PokeTradeType.Dump => "https://i.imgur.com/9wfEHwZ.png",
-                    PokeTradeType.FixOT => "https://i.imgur.com/gRZGFIi.png",
-                    PokeTradeType.Seed => "https://i.imgur.com/EI1BHr5.png",
-                    _ => detail.TradeData != null ? TradeExtensions<T>.PokeImg(detail.TradeData, false, true) : ""
-                };
-            }
+                PokeTradeType.Clone => "https://raw.githubusercontent.com/bdawg1989/sprites/main/clonepod.png",
+                PokeTradeType.Dump => "https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/128x128/dumpball.png",
+                PokeTradeType.FixOT => "https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/128x128/rocketball.png",
+                PokeTradeType.Seed => "https://raw.githubusercontent.com/bdawg1989/sprites/main/specialrequest.png",
+                _ => detail.TradeData != null ? TradeExtensions<T>.PokeImg(detail.TradeData, false, true) : ""
+            };
 
             var (r, g, b) = await GetDominantColorAsync(embedImageUrl);
 
             string footerText = detail.Type == PokeTradeType.Clone || detail.Type == PokeTradeType.Dump || detail.Type == PokeTradeType.Seed || detail.Type == PokeTradeType.FixOT
-                ? "Iniciando el comercio ahora."
-                : detail.Type == PokeTradeType.Item
-                    ? $"Iniciando el comercio ahora.\nDisfrute de su item: {embedData.HeldItem}!"
-                    : $"Iniciando el comercio ahora.\nDisfrute de su {(detail.IsMysteryTrade ? "🎭 Pokemon Misterioso 🎭" : detail.IsMysteryEgg ? "✨ Huevo Misterioso ✨" : speciesName)}!";
+                ? "Initializing trade now."
+                : $"Initializing trade now. Enjoy your {(detail.IsMysteryMon ? "✨ Mystery Pokémon" : detail.IsMysteryEgg ? "✨ Mystery Egg" : speciesName)}!";
 
             var embed = new EmbedBuilder()
                 .WithColor(new DiscordColor(r, g, b))
                 .WithThumbnailUrl(embedImageUrl)
-                .WithAuthor($"Siguiente: {user.Username}", user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
-                .WithDescription($"**Procesando**: {tradeTitle}\n**Trade ID**: {detail.ID}")
+                .WithAuthor($"Up Next: {user.Username}", user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
+                .WithDescription($"**Receiving**: {tradeTitle}\n**Trade ID**: {detail.ID}")
                 .WithFooter($"{footerText}\u200B", ballImgUrl)
                 .WithTimestamp(DateTime.Now)
                 .Build();
@@ -157,7 +135,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
     }
 
     [Command("startInfo")]
-    [Summary("Dump la configuración de Notificación de inicio.")]
+    [Summary("Dumps the Start Notification settings.")]
     [RequireSudo]
     public async Task DumpLogInfoAsync()
     {
@@ -166,7 +144,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
     }
 
     [Command("startClear")]
-    [Summary("Borra la configuración de Notificación de inicio en ese canal específico.")]
+    [Summary("Clears the Start Notification settings in that specific channel.")]
     [RequireSudo]
     public async Task ClearLogsAsync()
     {
@@ -174,30 +152,30 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
         if (Channels.TryGetValue(Context.Channel.Id, out var entry))
             Remove(entry);
         cfg.TradeStartingChannels.RemoveAll(z => z.ID == Context.Channel.Id);
-        await ReplyAsync($"<a:yes:1206485105674166292> Inicio Notificaciones borradas del canal: {Context.Channel.Name}").ConfigureAwait(false);
+        await ReplyAsync($"Start Notifications cleared from channel: {Context.Channel.Name}").ConfigureAwait(false);
     }
 
     [Command("startClearAll")]
-    [Summary("Borra todas las configuraciones de Notificación de inicio.")]
+    [Summary("Clears all the Start Notification settings.")]
     [RequireSudo]
     public async Task ClearLogsAllAsync()
     {
         foreach (var l in Channels)
         {
             var entry = l.Value;
-            await ReplyAsync($"<a:yes:1206485105674166292> Registro borrado de: {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
+            await ReplyAsync($"Logging cleared from {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
             SysCord<T>.Runner.Hub.Queues.Forwarders.Remove(entry.Action);
         }
         Channels.Clear();
         SysCordSettings.Settings.TradeStartingChannels.Clear();
-        await ReplyAsync("<a:yes:1206485105674166292> ¡Notificaciones de inicio borradas de todos los canales!").ConfigureAwait(false);
+        await ReplyAsync("Start Notifications cleared from all channels!").ConfigureAwait(false);
     }
 
     private RemoteControlAccess GetReference(IChannel channel) => new()
     {
         ID = channel.Id,
         Name = channel.Name,
-        Comment = $"Añadido por {Context.User.Username} el {DateTime.Now:yyyy.MM.dd-hh:mm:ss}",
+        Comment = $"Added by {Context.User.Username} on {DateTime.Now:yyyy.MM.dd-hh:mm:ss}",
     };
 
     public static async Task<(int R, int G, int B)> GetDominantColorAsync(string imagePath)
@@ -255,7 +233,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
         catch (Exception ex)
         {
             // Log or handle exceptions as needed
-            Console.WriteLine($"Error al procesar la imagen de {imagePath}. Error: {ex.Message}");
+            Console.WriteLine($"Error processing image from {imagePath}. Error: {ex.Message}");
             return (255, 255, 255);  // Default to white if an exception occurs
         }
     }
