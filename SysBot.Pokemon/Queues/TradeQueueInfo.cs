@@ -81,7 +81,7 @@ public sealed record TradeQueueInfo<T>(PokeTradeHub<T> Hub)
         {
             var queue = Hub.Queues.GetQueue(t);
             if (queue.Count == 0)
-                return "Nadie en la cola.";
+                return "Nobody in queue.";
             return queue.Summary();
         }
     }
@@ -189,7 +189,7 @@ public sealed record TradeQueueInfo<T>(PokeTradeHub<T> Hub)
     {
         lock (_sync)
         {
-            LogUtil.LogInfo($"Removiendo {detail.Trade.Trainer.TrainerName}", nameof(TradeQueueInfo<T>));
+            LogUtil.LogInfo($"Removing {detail.Trade.Trainer.TrainerName}", nameof(TradeQueueInfo<T>));
             return UsersInQueue.Remove(detail);
         }
     }

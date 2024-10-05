@@ -1,88 +1,91 @@
 using SysBot.Base;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.IO;
+using System.Text.Json;
 
 namespace SysBot.Pokemon;
 
 public class TradeCodeStorage
 {
     private const string FileName = "tradecodes.json";
-    private Dictionary<ulong, TradeCodeDetails> _tradeCodeDetails;
-
-    public class TradeCodeDetails
-    {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public string Code { get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public string? OT { get; set; }
-        public int TID { get; set; }
-        public int SID { get; set; }
-        public int TradeCount { get; set; }
-    }
-
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         WriteIndented = true
     };
+    private Dictionary<ulong, TradeCodeDetails>? _tradeCodeDetails;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    public TradeCodeStorage()
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    public TradeCodeStorage() => LoadFromFile();
+
+    public bool DeleteTradeCode(ulong trainerID)
     {
         LoadFromFile();
+        if (_tradeCodeDetails!.Remove(trainerID))
+        {
+            SaveToFile();
+            return true;
+        }
+        return false;
     }
 
     public int GetTradeCode(ulong trainerID)
     {
         LoadFromFile();
-
-        if (_tradeCodeDetails.TryGetValue(trainerID, out var details))
+        if (_tradeCodeDetails!.TryGetValue(trainerID, out var details))
         {
-            int code = int.Parse(details.Code); // Convierte de string a int
             details.TradeCount++;
             SaveToFile();
-            return code;
+            return details.Code;
         }
-        else
+        var code = GenerateRandomTradeCode();
+        _tradeCodeDetails![trainerID] = new TradeCodeDetails { Code = code, TradeCount = 1 };
+        SaveToFile();
+        return code;
+    }
+
+    public int GetTradeCount(ulong trainerID)
+    {
+        LoadFromFile();
+        if (_tradeCodeDetails!.TryGetValue(trainerID, out var details))
         {
-            var code = GenerateRandomTradeCode();
-            _tradeCodeDetails[trainerID] = new TradeCodeDetails { Code = code.ToString("D8"), TradeCount = 1 };
+            return details.TradeCount;
+        }
+        return 0;
+    }
+
+    public TradeCodeDetails? GetTradeDetails(ulong trainerID)
+    {
+        LoadFromFile();
+        if (_tradeCodeDetails!.TryGetValue(trainerID, out var details))
+        {
+            return details;
+        }
+        return null;
+    }
+
+    public void UpdateTradeDetails(ulong trainerID, string ot, int tid, int sid)
+    {
+        LoadFromFile();
+        if (_tradeCodeDetails!.TryGetValue(trainerID, out var details))
+        {
+            details.OT = ot;
+            details.TID = tid;
+            details.SID = sid;
             SaveToFile();
-            return code;
         }
     }
 
-    public bool SetTradeCode(ulong trainerID, int tradeCode)
+    public bool UpdateTradeCode(ulong trainerID, int newCode)
     {
-        // Convierte el entero a string aquí
-        string tradeCodeStr = tradeCode.ToString("D8"); // Formatea como un número de 8 dígitos
-
-        if (_tradeCodeDetails.ContainsKey(trainerID))
+        LoadFromFile();
+        if (_tradeCodeDetails!.TryGetValue(trainerID, out var details))
         {
-            return false;
+            details.Code = newCode;
+            SaveToFile();
+            return true;
         }
-
-        _tradeCodeDetails[trainerID] = new TradeCodeDetails { Code = tradeCodeStr, TradeCount = 1 };
-        SaveToFile();
-        return true;
-    }
-
-    public bool UpdateTradeCode(ulong trainerID, int newTradeCode)
-    {
-        if (!_tradeCodeDetails.ContainsKey(trainerID))
-        {
-            return false;
-        }
-
-        // Convierte el entero a string aquí también
-        string newTradeCodeStr = newTradeCode.ToString("D8"); // Asegura que tenga 8 dígitos
-
-        _tradeCodeDetails[trainerID].Code = newTradeCodeStr;
-        SaveToFile();
-        return true;
+        return false;
     }
 
     private static int GenerateRandomTradeCode()
@@ -96,26 +99,12 @@ public class TradeCodeStorage
         if (File.Exists(FileName))
         {
             string json = File.ReadAllText(FileName);
-#pragma warning disable CS8601 // Possible null reference assignment.
             _tradeCodeDetails = JsonSerializer.Deserialize<Dictionary<ulong, TradeCodeDetails>>(json, SerializerOptions);
-#pragma warning restore CS8601 // Possible null reference assignment.
         }
         else
         {
             _tradeCodeDetails = new Dictionary<ulong, TradeCodeDetails>();
         }
-    }
-
-    public bool DeleteTradeCode(ulong trainerID)
-    {
-        LoadFromFile();
-
-        if (_tradeCodeDetails.Remove(trainerID))
-        {
-            SaveToFile();
-            return true;
-        }
-        return false;
     }
 
     private void SaveToFile()
@@ -127,50 +116,24 @@ public class TradeCodeStorage
         }
         catch (IOException ex)
         {
-            LogUtil.LogInfo("TradeCodeStorage", $"Error al guardar códigos comerciales para archivar: {ex.Message}");
+            LogUtil.LogInfo("TradeCodeStorage", $"Error saving trade codes to file: {ex.Message}");
         }
         catch (UnauthorizedAccessException ex)
         {
-            LogUtil.LogInfo("TradeCodeStorage", $"Acceso denegado al guardar códigos comerciales en el archivo: {ex.Message}");
+            LogUtil.LogInfo("TradeCodeStorage", $"Access denied while saving trade codes to file: {ex.Message}");
         }
         catch (Exception ex)
         {
-            LogUtil.LogInfo("TradeCodeStorage", $"Se produjo un error al guardar códigos comerciales para archivar: {ex.Message}");
+            LogUtil.LogInfo("TradeCodeStorage", $"An error occurred while saving trade codes to file: {ex.Message}");
         }
     }
 
-    public int GetTradeCount(ulong trainerID)
+    public class TradeCodeDetails
     {
-        LoadFromFile();
-
-        if (_tradeCodeDetails.TryGetValue(trainerID, out var details))
-        {
-            return details.TradeCount;
-        }
-        return 0;
-    }
-
-    public TradeCodeDetails? GetTradeDetails(ulong trainerID)
-    {
-        LoadFromFile();
-
-        if (_tradeCodeDetails.TryGetValue(trainerID, out var details))
-        {
-            return details;
-        }
-        return null;
-    }
-
-    public void UpdateTradeDetails(ulong trainerID, string ot, int tid, int sid)
-    {
-        LoadFromFile();
-
-        if (_tradeCodeDetails.TryGetValue(trainerID, out var details))
-        {
-            details.OT = ot;
-            details.TID = tid;
-            details.SID = sid;
-            SaveToFile();
-        }
+        public int Code { get; set; }
+        public string? OT { get; set; }
+        public int SID { get; set; }
+        public int TID { get; set; }
+        public int TradeCount { get; set; }
     }
 }
