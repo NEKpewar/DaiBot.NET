@@ -60,7 +60,7 @@ public static class LogUtil
 
     public static void LogSafe(Exception exception, string identity)
     {
-        Logger.Log(LogLevel.Error, $"Excepción de {identity}:");
+        Logger.Log(LogLevel.Error, $"Exception from {identity}:");
         Logger.Log(LogLevel.Error, exception);
 
         var err = exception.InnerException;
@@ -83,7 +83,7 @@ public static class LogUtil
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.Error, $"No se pudo reenviar el registro desde {identity} - {message}");
+                Logger.Log(LogLevel.Error, $"Failed to forward log from {identity} - {message}");
                 Logger.Log(LogLevel.Error, ex);
             }
         }
